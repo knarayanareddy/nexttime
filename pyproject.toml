@@ -20,7 +20,10 @@ requires = ["hatchling==1.27.0"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["packages/domain/nexttime_domain"]
+packages = [
+  "packages/domain/nexttime_domain",
+  "packages/model-gateway/nexttime_model_gateway",
+]
 
 [tool.uv]
 package = true
@@ -42,4 +45,4 @@ select = ["E", "F", "I", "B", "UP", "S"]
 [tool.mypy]
 python_version = "3.12"
 strict = true
-files = ["packages/domain"]
+files = ["packages/domain", "packages/model-gateway"]

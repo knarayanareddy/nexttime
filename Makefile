@@ -21,10 +21,10 @@ lint:
 	$(UV) run ruff format --check .
 
 typecheck:
-	$(UV) run mypy packages/domain
+	$(UV) run mypy packages/domain packages/model-gateway
 
 test-unit:
-	$(UV) run pytest tests/unit --cov=nexttime_domain --cov-branch --cov-report=term-missing --cov-fail-under=90
+	$(UV) run pytest tests/unit --cov=nexttime_domain --cov=nexttime_model_gateway --cov-branch --cov-report=term-missing --cov-fail-under=90
 
 test-contract:
 	$(UV) run pytest tests/contract

@@ -1,0 +1,18 @@
+{
+  "version": "rubric_v1",
+  "review_status": "initial_specification_mapping_requires_educator_review",
+  "situations": {
+    "repair_appointment": {
+      "required": ["goal_stated", "appointment_confirmed"],
+      "optional": ["details_understood", "repair_requested", "independent_completion"]
+    },
+    "school_admin_appointment": {
+      "required": ["goal_stated", "appointment_confirmed"],
+      "optional": ["details_understood", "repair_requested", "independent_completion"]
+    },
+    "shift_clarification": {
+      "required": ["goal_stated", "next_step_confirmed"],
+      "optional": ["details_understood", "repair_requested", "independent_completion"]
+    }
+  }
+}

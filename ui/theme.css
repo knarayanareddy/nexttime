@@ -1,0 +1,3 @@
+/* Project theme and page-specific wireframe composition. */
+    body { background:#f3f5f7; }
+    :root { --canvas:#f6f2eb; --surface:#ffffff; --surface-2:#e8eee9; --text:#23332f; --muted:#53645d; --line:#b7c4bc; --primary:#2f6255; --on-primary:#ffffff; --accent:#91492f; --on-accent:#ffffff; --success:#2e684d; --warning:#735000; --danger:#91343b; --info:#315f8c; --focus:#285f8f; --font-body:"SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; --font-display:"SF Pro Display",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }

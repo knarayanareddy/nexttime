@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Static low-fidelity NextTime iOS wireframes using fictional Dutch rehearsal and authentic-attempt data.">
+  <title>NextTime — Low-fidelity wireframes</title>
+  <link rel="stylesheet" href="../specs/ui/wireframes.css">
+  <link rel="stylesheet" href="./theme.css">
+  <script src="../specs/ui/wireframes.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to wireframes</a>
+  <svg class="sprite" aria-hidden="true">
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v4m0 3h.01"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10h.01"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="8" y="3" width="8" height="13" rx="4"/><path d="M5 11a7 7 0 0 0 14 0m-7 7v3m-4 0h8"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15m-5-5 5 5-5 5"/></symbol>
+    <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18h11a4 4 0 0 0 0-8 6 6 0 0 0-11-1 4.5 4.5 0 0 0 0 9Z"/></symbol>
+  </svg>
+  <header class="review-header"><div class="review-header__inner"><div class="review-brand"><strong>NextTime</strong><span>UI specification / 03</span></div><nav class="review-links" aria-label="Document links"><a href="../../../specs/ui/index.html">All projects</a><a href="./DESIGN.md">Design</a><a href="./tokens.json">Tokens</a><a href="./WIREFRAMES.md">Screen notes</a></nav></div></header>
+  <main class="review-main" id="main">
+    <div class="review-intro"><span class="eyebrow">Quiet pocket coach · native iOS direction</span><h1>Practice for the next real moment.</h1><p>Five low-fidelity phone screens separate rehearsal from authentic outcomes, keep self evidence visible, and put privacy in the primary navigation.</p><div class="prototype-notice"><strong>Static review artifact.</strong> Events, Bee items, Dutch phrases, and outcomes are fictional. This static page cannot use the microphone, speech service, Bee bridge, or persistent storage.</div></div>
+    <nav aria-label="NextTime screens"><ul class="screen-nav"><li><a href="#today">01 · Today</a></li><li><a href="#review">02 · Attempt review</a></li><li><a href="#rehearsal">03 · Rehearsal</a></li><li><a href="#progress">04 · Progress</a></li><li><a href="#privacy">05 · Privacy</a></li></ul></nav>
+
+    <section class="wireframe" id="today" aria-labelledby="today-title">
+      <div class="screen-heading"><div><span class="screen-number">SCREEN 01 / iOS</span><h2 id="today-title">Today</h2></div><p>The next useful action is a short rehearsal tied to a real moment, not an open-ended tutor session.</p></div>
+      <div class="phone-grid">
+        <div class="phone-frame"><div class="phone-screen">
+          <header class="phone-header"><div><span class="eyebrow">Thursday, 19 November</span><h3>Today</h3><p>Fictional learner workspace</p></div><span class="status status--success"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>Offline ready</span></header>
+          <section class="panel panel--selected"><div class="cluster"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-calendar"/></svg><span class="eyebrow">Next real moment</span></div><h4 style="font-size:22px;margin-top:12px">Return a jacket at the shop</h4><p class="muted">Tomorrow · 10:30–11:00</p><dl class="definition-grid small"><dt>Source</dt><dd>Calendar · minimal event title</dd><dt>Practice focus</dt><dd>State a return request</dd><dt>Rehearsal</dt><dd>90 seconds · Dutch + optional English</dd></dl><div class="button-row"><a class="button" href="#rehearsal" style="width:100%">Start 90-second rehearsal <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></a></div><p class="micro muted">Audio and template are downloaded for offline use.</p></section>
+          <section class="phone-section"><div class="cluster cluster--between"><h4>Last authentic attempt</h4><a href="#review" class="small">Review</a></div><article class="card"><div class="cluster cluster--between"><strong>Returning an item</strong><span class="status status--warning">Partly completed</span></div><p class="small muted">18 Nov · Service counter · Deterministic review required</p><p class="small">Next possible focus: ask for clarification when the answer is too fast.</p></article></section>
+          <div class="banner"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-info"/></svg><div><strong>Practice is not a real-world result</strong><p>Only reviewed authentic attempts change progress.</p></div></div>
+          <nav class="phone-tabbar" aria-label="NextTime preview tabs"><a class="is-active" href="#today">Today</a><a href="#progress">Progress</a><a href="#privacy">Privacy</a></nav>
+        </div></div>
+        <aside class="phone-note"><span class="eyebrow">Empty and offline states</span><h3>Useful before the first attempt</h3><p class="small muted">With no upcoming moment, Today offers a chosen situation rather than inventing a calendar event. If rehearsal generation is unavailable, an explicit offline template takes its place.</p><div class="divider"></div><p class="small muted">Dynamic Type moves event metadata and actions into one vertical flow. Nothing relies on a fixed card height.</p></aside>
+      </div>
+      <details class="annotations" open><summary>Interaction and state annotations</summary><ul><li>Real-event source and rehearsal readiness are visible before starting.</li><li>The authentic outcome uses a different icon and label from practice completion.</li><li>No streak, score, countdown pressure, or celebratory grade appears.</li></ul></details>
+    </section>
+
+    <section class="wireframe" id="review" aria-labelledby="review-title">
+      <div class="screen-heading"><div><span class="screen-number">SCREEN 02 / iOS</span><h2 id="review-title">Authentic attempt review</h2></div><p>Deterministic interpretation is inspectable, uncertain, and correctable.</p></div>
+      <div class="phone-grid">
+        <div class="phone-frame"><div class="phone-screen">
+          <header class="phone-header"><div><span class="eyebrow">Authentic attempt · review required</span><h3>Returning an item</h3><p>18 Nov 2026 · Service counter</p></div><span class="status status--info"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-cloud"/></svg>Bee source</span></header>
+          <div class="banner"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-lock"/></svg><div><strong>Consented source excerpt</strong><p>Participants: self + shop staff · Policy NT-DEMO-3</p></div></div>
+          <section class="phone-section"><h4>Deterministic outcome</h4><div class="panel"><div class="cluster cluster--between"><strong>Return request completed</strong><span class="status status--warning">Partly</span></div><ul class="rule-list small"><li class="cluster cluster--between"><span>State the request</span><span class="status status--success">Confirmed</span></li><li class="cluster cluster--between"><span>Provide receipt</span><span class="status status--success">Confirmed</span></li><li class="cluster cluster--between"><span>Understand refund answer</span><span class="status status--warning">Uncertain</span></li></ul><p class="micro muted">Confidence is criterion-specific. Unknown is not scored as failure.</p></div></section>
+          <section class="phone-section"><h4>Proposed next breakdown</h4><div class="panel panel--accent"><span class="eyebrow">Proposal · not yet accepted</span><h4 style="margin-top:8px">Ask for clarification</h4><p class="small muted">Practice one phrase when an answer is too fast or unclear.</p><blockquote style="margin:12px 0;padding-left:12px;border-left:2px solid var(--line)"><p class="small">“Ik wil deze jas graag retourneren.”</p><p class="micro muted">Self evidence · Dutch excerpt; no private staff speech included</p></blockquote></div></section>
+          <div class="button-row"><button class="button" type="button" data-static>Confirm proposal</button><button class="button button--secondary" type="button" data-static>Edit</button><button class="button button--secondary" type="button" data-static>Reject</button></div>
+          <nav class="phone-tabbar" aria-label="NextTime preview tabs"><a href="#today">Today</a><a href="#progress">Progress</a><a href="#privacy">Privacy</a></nav>
+        </div></div>
+        <aside class="phone-note"><span class="eyebrow">Correction contract</span><h3>Rejection preserves the attempt</h3><ul class="rule-list small"><li><strong>Confirm</strong><br><span class="muted">Accept the proposed functional target.</span></li><li><strong>Edit</strong><br><span class="muted">Change the proposal without rewriting the authentic source.</span></li><li><strong>Reject</strong><br><span class="muted">Do not advance this target as fact; keep the original review record.</span></li></ul></aside>
+      </div>
+      <details class="annotations"><summary>Interaction and state annotations</summary><ul><li>Outcome, evidence, and proposal remain separate visual objects.</li><li>Self excerpts are quoted, not shown as a red correction transcript.</li><li>All three correction actions are available at equal target size.</li></ul></details>
+    </section>
+
+    <section class="wireframe" id="rehearsal" aria-labelledby="rehearsal-title">
+      <div class="screen-heading"><div><span class="screen-number">SCREEN 03 / iOS</span><h2 id="rehearsal-title">Rehearsal turn — recording</h2></div><p>A persistent visual state, explicit stop, and non-speaking route make recording understandable.</p></div>
+      <div class="phone-grid">
+        <div class="phone-frame"><div class="phone-screen">
+          <header class="phone-header"><div><span class="eyebrow">Practice · turn 2 of 3</span><h3>At the service counter</h3><p>Target: ask for clarification</p></div><span class="status status--neutral">90-sec rehearsal</span></header>
+          <section class="panel"><span class="eyebrow">Shop assistant</span><p style="font-size:21px;line-height:1.4">“We kunnen het bedrag terugstorten op uw rekening.”</p><button class="button button--ghost" type="button" data-static>Show English support</button></section>
+          <section class="phone-section"><button class="button button--secondary" type="button" data-static style="width:100%">Need a phrase? <span class="muted">Kunt u dat langzamer zeggen?</span></button></section>
+          <section class="phone-section" style="text-align:center"><div class="status status--danger"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-mic"/></svg>Recording · 00:04</div><button class="record-control" style="border-color:var(--danger);color:var(--danger)" type="button" data-static aria-label="Stop recording"><span>Stop</span></button><p><strong>Release or tap to stop</strong></p><p class="small muted">Only this intentional turn is captured. Counterpart text stays visible.</p></section>
+          <div class="banner banner--warning"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-info"/></svg><div><strong>Correction waits</strong><p>Speech processing begins only after you stop.</p></div></div>
+          <div class="button-row"><button class="button button--secondary" type="button" data-static>Complete with text instead</button><button class="button button--ghost" type="button" data-static>Exit rehearsal</button></div>
+          <nav class="phone-tabbar" aria-label="NextTime preview tabs"><a href="#today">Today</a><a href="#progress">Progress</a><a href="#privacy">Privacy</a></nav>
+        </div></div>
+        <aside class="phone-note"><span class="eyebrow">Input alternatives</span><h3>One rehearsal, multiple ways to participate</h3><p class="small muted">VoiceOver and Switch Control can use tap-to-start/stop. Text completion is labeled non-speaking practice and is never framed as a lesser result.</p><div class="divider"></div><p class="small muted">Reduced motion uses this static recording indicator. There is no pulsing red control or repeated haptic.</p></aside>
+      </div>
+      <details class="annotations"><summary>Interaction and state annotations</summary><ul><li>Recording uses icon, text, elapsed time, and stop control—not red alone.</li><li>Microphone denial opens the text route without losing the rehearsal.</li><li>Processing status includes cancel/retry and does not immediately display negative correction.</li></ul></details>
+    </section>
+
+    <section class="wireframe" id="progress" aria-labelledby="progress-title">
+      <div class="screen-heading"><div><span class="screen-number">SCREEN 04 / iOS</span><h2 id="progress-title">Authentic progress</h2></div><p>Small samples and uncertainty are shown next to functional changes.</p></div>
+      <div class="phone-grid">
+        <div class="phone-frame"><div class="phone-screen">
+          <header class="phone-header"><div><span class="eyebrow">Evidence from real situations</span><h3>Progress</h3><p>Dutch · Service-counter returns</p></div><span class="status status--info">2 authentic attempts</span></header>
+          <div class="banner"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-info"/></svg><div><strong>Small evidence base</strong><p>Two comparable attempts show a change, not a stable fluency level.</p></div></div>
+          <section class="phone-section"><h4>Return an item</h4><div class="panel"><div class="cluster cluster--between"><span class="muted">First reviewed attempt</span><strong>4 Nov</strong></div><div class="cluster cluster--between"><span class="muted">Latest reviewed attempt</span><strong>18 Nov</strong></div><div class="divider"></div><ul class="rule-list small"><li><div class="cluster cluster--between"><strong>State the request</strong><span class="status status--success">Clearer evidence</span></div><p class="muted">Needed support → completed request</p></li><li><div class="cluster cluster--between"><strong>Provide receipt</strong><span class="status status--neutral">Consistent</span></div><p class="muted">Confirmed in both attempts</p></li><li><div class="cluster cluster--between"><strong>Ask for clarification</strong><span class="status status--warning">Still uncertain</span></div><p class="muted">Insufficient evidence in latest attempt</p></li></ul></div></section>
+          <section class="phone-section"><h4>Evidence included</h4><div class="card"><p class="small">✓ Reviewed authentic attempts</p><p class="small">✓ Self excerpts and deterministic criteria</p><p class="small">× Rehearsals, app usage time, and guessed CEFR levels</p></div></section>
+          <button class="button button--secondary" type="button" data-static style="width:100%">Inspect attempt evidence</button>
+          <nav class="phone-tabbar" aria-label="NextTime preview tabs"><a href="#today">Today</a><a class="is-active" href="#progress">Progress</a><a href="#privacy">Privacy</a></nav>
+        </div></div>
+        <aside class="phone-note"><span class="eyebrow">Before two attempts</span><h3>No fake zero-score chart</h3><p class="small muted">With no attempts, Progress explains how authentic evidence appears and links back to Today. With one baseline, it shows that attempt without claiming a trend.</p></aside>
+      </div>
+      <details class="annotations"><summary>Interaction and state annotations</summary><ul><li>Practice performance cannot enter this comparison.</li><li>Every criterion links back to its reviewed attempt evidence.</li><li>Fluency percentages, leagues, grades, and streaks are not inferred.</li></ul></details>
+    </section>
+
+    <section class="wireframe" id="privacy" aria-labelledby="privacy-title">
+      <div class="screen-heading"><div><span class="screen-number">SCREEN 05 / iOS</span><h2 id="privacy-title">Privacy and sources</h2></div><p>Capture, source access, retention, revocation, and deletion have separate scopes.</p></div>
+      <div class="phone-grid">
+        <div class="phone-frame"><div class="phone-screen">
+          <header class="phone-header"><div><span class="eyebrow">Your data, your decision</span><h3>Privacy</h3><p>Plain-language controls · Policy NT-DEMO-3</p></div><span class="status status--success"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-lock"/></svg>Local first</span></header>
+          <section class="panel"><div class="cluster cluster--between"><h4>Attempt capture</h4><span class="status status--info">Intentional turns only</span></div><dl class="definition-grid small"><dt>Participants</dt><dd>Self + present participants</dd><dt>Consent</dt><dd>Required per situation</dd><dt>Rehearsal audio</dt><dd>Delete after processing</dd></dl><button class="button button--secondary" type="button" data-static style="width:100%;margin-top:12px">Review capture settings</button></section>
+          <section class="phone-section"><h4>Connected sources</h4><div class="panel"><div class="cluster cluster--between"><strong>Bee personal memory</strong><span class="status status--warning">Review required</span></div><p class="small muted">Fictional bridge · last item received 18 Nov, 18:42</p><p class="small">New items wait for deterministic review. They do not automatically become progress.</p><div class="button-row"><button class="button button--secondary" type="button" data-static>Manage Bee access</button><button class="button button--danger" type="button" data-static>Revoke</button></div></div></section>
+          <section class="phone-section"><h4>Retention and export</h4><ul class="rule-list small"><li class="cluster cluster--between"><span>Source items</span><strong>30 days · configurable</strong></li><li class="cluster cluster--between"><span>Derived attempts</span><strong>Until deleted</strong></li></ul><div class="button-row"><button class="button button--secondary" type="button" data-static>Export my data</button><button class="button button--danger" type="button" data-static>Delete by scope…</button></div></section>
+          <nav class="phone-tabbar" aria-label="NextTime preview tabs"><a href="#today">Today</a><a href="#progress">Progress</a><a class="is-active" href="#privacy">Privacy</a></nav>
+        </div></div>
+        <aside class="phone-note"><span class="eyebrow">Revocation ≠ deletion</span><h3>Separate consequences</h3><p class="small muted">Revoking Bee stops future access. It does not silently delete unrelated local attempts. Deletion confirmation names selected source items, derived attempts, and exports before anything is removed.</p></aside>
+      </div>
+      <details class="annotations"><summary>Interaction and state annotations</summary><ul><li>Bridge offline preserves local review and export controls.</li><li>Destructive confirmation lists categories rather than a vague “everything.”</li><li>Technical source details expand below the plain-language summary.</li></ul></details>
+    </section>
+    <p class="demo-status" id="demo-status" role="status" aria-live="polite"></p>
+  </main>
+  <footer class="review-footer">NextTime low-fidelity UI specification · Fictional fixtures only · No iOS, microphone, Bee, or speech integration is active.</footer>
+</body>
+</html>

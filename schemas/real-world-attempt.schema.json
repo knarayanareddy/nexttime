@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://specs.local/nexttime/real-world-attempt.schema.json",
+  "title": "NextTime Real-World Attempt",
+  "description": "Minimized, consent-linked record of one authentic language attempt. It does not contain long-term other-speaker transcript turns.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "attempt_id", "learner_id", "source", "context", "consent", "processing", "outcome", "breakdowns", "status", "retention", "version", "created_at", "updated_at"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "attempt_id": { "$ref": "#/$defs/ulid" },
+    "learner_id": { "$ref": "#/$defs/ulid" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bee_recording_reference", "recorded_at", "capture_mode", "device_type", "provenance"],
+      "properties": {
+        "bee_recording_reference": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "recorded_at": { "$ref": "#/$defs/timestamp" },
+        "capture_mode": { "enum": ["consented_conversation", "self_memo"] },
+        "device_type": { "enum": ["bee_device", "apple_watch_bee"] },
+        "provenance": { "enum": ["live_bee", "fixture"] }
+      }
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["situation", "target_language", "support_language", "learner_goal", "rubric_version"],
+      "properties": {
+        "situation": { "enum": ["repair_appointment", "school_admin_appointment", "shift_clarification"] },
+        "target_language": { "const": "nl" },
+        "support_language": { "const": "en" },
+        "learner_goal": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "rubric_version": { "type": "string", "pattern": "^rubric_v[0-9]+$" },
+        "recurrence_id": { "$ref": "#/$defs/ulid" }
+      }
+    },
+    "consent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["consent_id", "policy_version", "attested_at", "all_participants_consented", "revoked"],
+      "properties": {
+        "consent_id": { "$ref": "#/$defs/ulid" },
+        "policy_version": { "type": "string", "pattern": "^consent_v[0-9]+$" },
+        "attested_at": { "$ref": "#/$defs/timestamp" },
+        "all_participants_consented": { "type": "boolean" },
+        "revoked": { "type": "boolean" },
+        "revoked_at": { "$ref": "#/$defs/timestamp" }
+      }
+    },
+    "processing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["diarization_method", "asr_confidence", "redaction_status", "other_speaker_transcript_retained", "model_version"],
+      "properties": {
+        "diarization_method": { "enum": ["bee_speaker_labels", "aws_diarization", "learner_labeled", "self_only"] },
+        "asr_confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "redaction_status": { "enum": ["pending", "review_required", "minimized"] },
+        "other_speaker_transcript_retained": { "const": false },
+        "model_version": { "type": "string", "minLength": 1, "maxLength": 120 }
+      }
+    },
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "criteria", "confirmation_required", "confirmed_by_learner"],
+      "properties": {
+        "status": { "enum": ["success", "partial", "failed", "unknown"] },
+        "criteria": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["criterion_id", "result", "self_evidence_excerpt"],
+            "properties": {
+              "criterion_id": { "enum": ["goal_stated", "repair_requested", "details_understood", "appointment_confirmed", "next_step_confirmed", "independent_completion"] },
+              "result": { "enum": ["satisfied", "not_satisfied", "unknown"] },
+              "self_evidence_excerpt": { "type": "string", "maxLength": 500 },
+              "self_evidence_start_ms": { "type": "integer", "minimum": 0 },
+              "self_evidence_end_ms": { "type": "integer", "minimum": 0 }
+            }
+          }
+        },
+        "confirmation_required": { "type": "boolean" },
+        "confirmed_by_learner": { "type": "boolean" },
+        "confirmed_at": { "$ref": "#/$defs/timestamp" }
+      }
+    },
+    "breakdowns": {
+      "type": "array",
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["breakdown_id", "code", "description", "self_evidence_excerpt", "confidence", "review_status"],
+        "properties": {
+          "breakdown_id": { "$ref": "#/$defs/ulid" },
+          "code": { "enum": ["confirmation_missing", "comprehension_repair", "time_expression", "polite_request", "closure", "unknown"] },
+          "description": { "type": "string", "minLength": 1, "maxLength": 300 },
+          "self_evidence_excerpt": { "type": "string", "maxLength": 500 },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "review_status": { "enum": ["proposed", "confirmed", "rejected"] }
+        }
+      }
+    },
+    "next_occurrence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scheduled_for", "source", "rehearsal_at", "time_zone"],
+      "properties": {
+        "scheduled_for": { "$ref": "#/$defs/timestamp" },
+        "source": { "enum": ["learner_marked", "explicit_calendar_link"] },
+        "rehearsal_at": { "$ref": "#/$defs/timestamp" },
+        "time_zone": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "calendar_event_reference": { "type": "string", "maxLength": 256 }
+      }
+    },
+    "status": { "enum": ["processing", "awaiting_learner_review", "confirmed", "excluded", "deletion_pending"] },
+    "retention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["transient_source_delete_after", "derived_delete_after"],
+      "properties": {
+        "transient_source_delete_after": { "$ref": "#/$defs/timestamp" },
+        "derived_delete_after": { "$ref": "#/$defs/timestamp" }
+      }
+    },
+    "version": { "type": "integer", "minimum": 1 },
+    "created_at": { "$ref": "#/$defs/timestamp" },
+    "updated_at": { "$ref": "#/$defs/timestamp" }
+  },
+  "$defs": {
+    "ulid": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "timestamp": { "type": "string", "format": "date-time" }
+  }
+}

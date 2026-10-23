@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "attempt_id": "01000000000000000000000001",
+  "learner_id": "01000000000000000000000002",
+  "source": {
+    "bee_recording_reference": "fixture-bee-recording-001",
+    "recorded_at": "2026-10-22T15:00:00.000Z",
+    "capture_mode": "consented_conversation",
+    "device_type": "bee_device",
+    "provenance": "fixture"
+  },
+  "context": {
+    "situation": "repair_appointment",
+    "target_language": "nl",
+    "support_language": "en",
+    "learner_goal": "Confirm a repair appointment time in Dutch.",
+    "rubric_version": "rubric_v1",
+    "recurrence_id": "01000000000000000000000003"
+  },
+  "consent": {
+    "consent_id": "01000000000000000000000004",
+    "policy_version": "consent_v1",
+    "attested_at": "2026-10-22T14:59:00.000Z",
+    "all_participants_consented": true,
+    "revoked": false
+  },
+  "processing": {
+    "diarization_method": "bee_speaker_labels",
+    "asr_confidence": 0.91,
+    "redaction_status": "minimized",
+    "other_speaker_transcript_retained": false,
+    "model_version": "breakdown-extractor-v1"
+  },
+  "outcome": {
+    "status": "partial",
+    "criteria": [
+      {
+        "criterion_id": "goal_stated",
+        "result": "satisfied",
+        "self_evidence_excerpt": "Ik wil een afspraak voor de reparatie.",
+        "self_evidence_start_ms": 1200,
+        "self_evidence_end_ms": 4100
+      },
+      {
+        "criterion_id": "appointment_confirmed",
+        "result": "unknown",
+        "self_evidence_excerpt": ""
+      }
+    ],
+    "confirmation_required": true,
+    "confirmed_by_learner": false
+  },
+  "breakdowns": [
+    {
+      "breakdown_id": "01000000000000000000000005",
+      "code": "confirmation_missing",
+      "description": "The attempt ended without an explicit confirmation of the proposed time.",
+      "self_evidence_excerpt": "Ja, dank u.",
+      "confidence": 0.82,
+      "review_status": "proposed"
+    }
+  ],
+  "next_occurrence": {
+    "scheduled_for": "2026-10-24T15:00:00.000Z",
+    "source": "learner_marked",
+    "rehearsal_at": "2026-10-24T14:00:00.000Z",
+    "time_zone": "Europe/Amsterdam"
+  },
+  "status": "awaiting_learner_review",
+  "retention": {
+    "transient_source_delete_after": "2026-10-23T15:00:00.000Z",
+    "derived_delete_after": "2026-11-23T15:00:00.000Z"
+  },
+  "version": 1,
+  "created_at": "2026-10-22T15:01:00.000Z",
+  "updated_at": "2026-10-22T15:02:00.000Z"
+}

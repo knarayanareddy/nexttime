@@ -3,6 +3,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
+from .breakdowns import BreakdownProposalService
 from .minimization import validate_minimized_attempt
 from .models import (
     AttemptEvaluationInput,
@@ -92,6 +93,25 @@ def main() -> None:
         source, minimized_at=source.recorded_at + timedelta(hours=1)
     )
     duplicate_safe = minimization_service.minimize(source) is minimized
+    proposal_service = BreakdownProposalService(rubric)
+    proposal = proposal_service.propose(
+        minimized,
+        consent_id=document["consent"]["consent_id"],
+        consent_attested_at=datetime(2026, 10, 22, 14, 59, tzinfo=UTC),
+        all_participants_consented=True,
+        learner_goal=document["context"]["learner_goal"],
+        recurrence_id=document["context"]["recurrence_id"],
+        proposed_at=source.recorded_at + timedelta(hours=1),
+    )
+    proposal_duplicate_safe = proposal_service.propose(
+        minimized,
+        consent_id=document["consent"]["consent_id"],
+        consent_attested_at=datetime(2026, 10, 22, 14, 59, tzinfo=UTC),
+        all_participants_consented=True,
+        learner_goal=document["context"]["learner_goal"],
+        recurrence_id=document["context"]["recurrence_id"],
+        proposed_at=source.recorded_at + timedelta(hours=1),
+    ).duplicate
     reviewed_service = AttemptReviewService(document, rubric)
     reviewed_service.review_breakdown(
         actor_learner_id=document["learner_id"],
@@ -191,6 +211,11 @@ def main() -> None:
                 "minimized_self_excerpts": len(minimized.self_excerpts),
                 "other_speaker_transcript_retained": minimized.other_speaker_transcript_retained,
                 "duplicate_source_safe": duplicate_safe,
+                "proposed_breakdowns_count": len(proposal.breakdowns),
+                "proposed_breakdown_codes": [item.code.value for item in proposal.breakdowns],
+                "proposed_breakdown_confidences": [item.confidence for item in proposal.breakdowns],
+                "proposed_learner_review_required": proposal.learner_review_required,
+                "proposal_duplicate_safe": proposal_duplicate_safe,
                 "outcome": outcome.status.value,
                 "confirmation_required": outcome.confirmation_required,
                 "reason_codes": outcome.reason_codes,

@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://specs.local/nexttime/breakdown-proposal-output.schema.json",
+  "title": "NextTime Breakdown Proposal Gateway Output",
+  "description": "Bounded untrusted model output for proposing at most three functional breakdowns and criterion evidence candidates. Chain-of-thought and overall outcome assertions are excluded.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "criteria", "breakdowns"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "criteria": {
+      "type": "array",
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "criterion_id",
+          "result",
+          "excerpt_index",
+          "self_evidence_excerpt",
+          "model_confidence"
+        ],
+        "properties": {
+          "criterion_id": { "$ref": "#/$defs/criterion_id" },
+          "result": { "enum": ["satisfied", "not_satisfied", "unknown"] },
+          "excerpt_index": {
+            "type": ["integer", "null"],
+            "minimum": 0
+          },
+          "self_evidence_excerpt": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "model_confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      }
+    },
+    "breakdowns": {
+      "type": "array",
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "description",
+          "excerpt_index",
+          "self_evidence_excerpt",
+          "model_confidence"
+        ],
+        "properties": {
+          "code": {
+            "enum": [
+              "confirmation_missing",
+              "comprehension_repair",
+              "time_expression",
+              "polite_request",
+              "closure",
+              "unknown"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "excerpt_index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "self_evidence_excerpt": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "model_confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "criterion_id": {
+      "enum": [
+        "goal_stated",
+        "repair_requested",
+        "details_understood",
+        "appointment_confirmed",
+        "next_step_confirmed",
+        "independent_completion"
+      ]
+    }
+  }
+}

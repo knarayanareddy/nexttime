@@ -20,6 +20,7 @@ REQUIRED_SAMPLE_WIDTH_BYTES = 2
 MAX_CHUNK_BYTES = 65_536
 MAX_PTT_TURN_DURATION_MS = 30_000
 REHEARSAL_MAPPING_CONFIDENCE_THRESHOLD = 0.75
+ALLOWED_PTT_CAPTURE_ORIGINS = frozenset({"iphone_rehearsal_ptt", "cli_rehearsal_simulator"})
 
 
 def _iso_utc(value: datetime) -> str:
@@ -254,7 +255,7 @@ class ConsentedAudioChunkTranscriber:
         now = (transcribed_at or datetime.now(UTC)).astimezone(UTC)
         now_iso = _iso_utc(transcribed_at or now)
 
-        if continuous_stream or capture_origin != "iphone_rehearsal_ptt":
+        if continuous_stream or capture_origin not in ALLOWED_PTT_CAPTURE_ORIGINS:
             _zero_all_chunks(chunks, deleted_iso=now_iso)
             raise CovertCaptureProhibitedError("continuous_microphone_streaming_prohibited")
 
@@ -364,3 +365,6 @@ class ConsentedAudioChunkTranscriber:
             provider="aws_transcribe_streaming",
             provenance=self._transport.provenance,
         )
+
+
+AudioChunkTranscriber = ConsentedAudioChunkTranscriber

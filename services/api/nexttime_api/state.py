@@ -6,6 +6,7 @@ import hashlib
 import hmac
 import json
 import secrets
+from collections.abc import Sequence
 from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
@@ -36,22 +37,27 @@ from nexttime_domain import (
     HapticFeedbackEvent,
     HapticPreferences,
     NotificationBehavior,
+    PacingHapticsEngine,
     PracticeMode,
     RawSpeakerSegment,
-    RehearsalHapticGenerator,
     RehearsalPacingTrigger,
     Rubric,
     SeparationMethod,
     Situation,
     SkillState,
+    SourceTranscript,
+    Speaker,
     SpeakerSeparationPolicy,
+    TranscriptTurn,
     build_learner_export,
     deterministic_ulid,
+    minimize_transcript,
     rubric_from_mapping,
 )
 from nexttime_minimization import DeletionPipelineWorker, InMemoryArtifactStore
+from nexttime_model_gateway import GatewayBreakdownExtractor, ModelGateway
 from nexttime_rehearsal import (
-    ConsentedAudioChunkTranscriber,
+    AudioChunkTranscriber,
     CovertCaptureProhibitedError,
     DeterministicFixtureTranscribeTransport,
     PcmAudioChunk,
@@ -135,11 +141,12 @@ class RehearsalSessionEntry:
     learner_id: str
     breakdown_id: str
     service: FixtureRehearsalService
-    haptics: RehearsalHapticGenerator = field(
-        default_factory=lambda: RehearsalHapticGenerator(rehearsal_id="pending")
+    haptics: PacingHapticsEngine = field(
+        default_factory=lambda: PacingHapticsEngine(rehearsal_id="pending")
     )
     committed_sequences: list[int] = field(default_factory=list)
     recorded_in_progress: bool = False
+    ephemeral_simulator: bool = False
 
 
 class ApiRuntimeState:
@@ -151,6 +158,7 @@ class ApiRuntimeState:
         rubric: Rubric | None = None,
         allow_structured_local_tokens: bool = True,
         clock: datetime | None = None,
+        model_gateway: ModelGateway | None = None,
     ) -> None:
         if rubric is None:
             raw_rubric = json.loads((ROOT / "packages" / "rubrics" / "rubric_v1.json").read_text())
@@ -168,8 +176,10 @@ class ApiRuntimeState:
             deletion_worker=self.deletion_worker,
             rubric=self.rubric,
         )
+        self.model_gateway = model_gateway or ModelGateway()
+        self.breakdown_extractor = GatewayBreakdownExtractor(self.model_gateway)
         self.calendar_sync = CalendarSyncService()
-        self.chunk_transcriber = ConsentedAudioChunkTranscriber(
+        self.chunk_transcriber = AudioChunkTranscriber(
             transport=DeterministicFixtureTranscribeTransport()
         )
         self._progress_by_learner: dict[str, AuthenticProgressService] = {}
@@ -863,7 +873,7 @@ class ApiRuntimeState:
             learner_id=actor_id,
             breakdown_id=req.breakdown_id,
             service=rehearsal_svc,
-            haptics=RehearsalHapticGenerator(rehearsal_id=rehearsal_id),
+            haptics=PacingHapticsEngine(rehearsal_id=rehearsal_id),
         )
         self._rehearsals[rehearsal_id] = entry
         self._rehearsal_by_recurrence[pair_key] = rehearsal_id
@@ -1458,7 +1468,7 @@ class ApiRuntimeState:
                 if event.sequence is not None
                 else None
             ),
-            "target_device": "ios_rehearsal_client",
+            "target_device": event.target_device,
             "emitted": event.emitted,
             "suppression_reason": event.suppression_reason,
             "visual_caption_key": event.visual_caption_key,
@@ -1498,3 +1508,250 @@ class ApiRuntimeState:
                 ),
             ) from error
         return self._serialize_haptic_event(event)
+
+    def create_ephemeral_simulator_rehearsal(
+        self,
+        *,
+        actor_id: str,
+        situation: Situation,
+    ) -> RehearsalSessionEntry:
+        """Create an isolated fixture-labeled rehearsal session for WebSocket/CLI simulation."""
+        now = self.now()
+        token_seed = secrets.token_hex(6)
+        attempt_id = deterministic_ulid(
+            namespace="sim-attempt",
+            seed=f"{actor_id}:{situation.value}:{token_seed}",
+            timestamp=now,
+        )
+        recurrence_id = deterministic_ulid(
+            namespace="sim-recurrence",
+            seed=f"{actor_id}:{attempt_id}",
+            timestamp=now,
+        )
+        consent_id = deterministic_ulid(
+            namespace="sim-consent",
+            seed=f"{actor_id}:{attempt_id}",
+            timestamp=now,
+        )
+        breakdown_id = deterministic_ulid(
+            namespace="sim-breakdown",
+            seed=f"{actor_id}:{attempt_id}",
+            timestamp=now,
+        )
+        rehearsal_id = deterministic_ulid(
+            namespace="sim-rehearsal",
+            seed=f"{actor_id}:{recurrence_id}",
+            timestamp=now,
+        )
+        confirm_criterion = (
+            "next_step_confirmed" if situation is Situation.SHIFT else "appointment_confirmed"
+        )
+        fixture_doc: dict[str, Any] = {
+            "schema_version": 1,
+            "attempt_id": attempt_id,
+            "learner_id": actor_id,
+            "source": {
+                "bee_recording_reference": f"fixture-sim-{token_seed}",
+                "recorded_at": _iso_utc(now - timedelta(hours=1)),
+                "capture_mode": "self_memo",
+                "device_type": "bee_device",
+                "provenance": "fixture",
+            },
+            "context": {
+                "situation": situation.value,
+                "target_language": "nl",
+                "support_language": "en",
+                "learner_goal": f"Practice {situation.value} confirmation in Dutch.",
+                "rubric_version": self.rubric.version,
+                "recurrence_id": recurrence_id,
+            },
+            "consent": {
+                "consent_id": consent_id,
+                "policy_version": "consent_v1",
+                "attested_at": _iso_utc(now - timedelta(hours=2)),
+                "all_participants_consented": True,
+                "revoked": False,
+            },
+            "processing": {
+                "diarization_method": "self_only",
+                "asr_confidence": 0.92,
+                "redaction_status": "minimized",
+                "other_speaker_transcript_retained": False,
+                "model_version": "deterministic-breakdown-v1",
+            },
+            "outcome": {
+                "status": "partial",
+                "criteria": [
+                    {
+                        "criterion_id": "goal_stated",
+                        "result": "satisfied",
+                        "self_evidence_excerpt": "Ik wil een afspraak maken.",
+                        "self_evidence_start_ms": 0,
+                        "self_evidence_end_ms": 2500,
+                    },
+                    {
+                        "criterion_id": confirm_criterion,
+                        "result": "not_satisfied",
+                        "self_evidence_excerpt": "",
+                    },
+                ],
+                "confirmation_required": False,
+                "confirmed_by_learner": True,
+            },
+            "breakdowns": [
+                {
+                    "breakdown_id": breakdown_id,
+                    "code": "confirmation_missing",
+                    "description": "Explicit date/time or next-step confirmation was missing.",
+                    "self_evidence_excerpt": "Ik wil een afspraak maken.",
+                    "confidence": 0.88,
+                    "review_status": "confirmed",
+                }
+            ],
+            "next_occurrence": {
+                "scheduled_for": _iso_utc(now + timedelta(hours=2)),
+                "source": "learner_marked",
+                "rehearsal_at": _iso_utc(now + timedelta(minutes=15)),
+                "time_zone": "Europe/Amsterdam",
+            },
+            "status": "confirmed",
+            "retention": {
+                "transient_source_delete_after": _iso_utc(now + timedelta(hours=23)),
+                "derived_delete_after": _iso_utc(now + timedelta(days=30)),
+            },
+            "version": 1,
+            "created_at": _iso_utc(now - timedelta(minutes=50)),
+            "updated_at": _iso_utc(now - timedelta(minutes=45)),
+        }
+        svc = FixtureRehearsalService(
+            fixture_doc,
+            actor_learner_id=actor_id,
+            breakdown_id=breakdown_id,
+            initial_skill_states=self.store.skill_states.get(actor_id, {}),
+        )
+        tz = ZoneInfo("Europe/Amsterdam")
+        svc.mark_recurrence(
+            actor_learner_id=actor_id,
+            occurrence_at=(now + timedelta(hours=2)).astimezone(tz),
+            marked_at=now.astimezone(tz),
+        )
+        svc.schedule(
+            actor_learner_id=actor_id,
+            learner_confirmed=True,
+            selected_at=(now + timedelta(minutes=15)).astimezone(tz),
+            notification_behavior=NotificationBehavior.OPEN_TEMPLATE_ONLY,
+        )
+        entry = RehearsalSessionEntry(
+            rehearsal_id=rehearsal_id,
+            recurrence_id=recurrence_id,
+            attempt_id=attempt_id,
+            learner_id=actor_id,
+            breakdown_id=breakdown_id,
+            service=svc,
+            haptics=PacingHapticsEngine(rehearsal_id=rehearsal_id),
+            ephemeral_simulator=True,
+        )
+        self._rehearsals[rehearsal_id] = entry
+        self.store.rehearsal_sessions[rehearsal_id] = {
+            "rehearsal_id": rehearsal_id,
+            "recurrence_id": recurrence_id,
+            "attempt_id": attempt_id,
+            "learner_id": actor_id,
+            "target_function": svc.scenario.target_function,
+            "state": svc.state.value,
+            "non_speaking_practice": False,
+        }
+        return entry
+
+    def build_rehearsal_breakdown_summary(
+        self,
+        *,
+        entry: RehearsalSessionEntry,
+        dialogue_turns: Sequence[TranscriptTurn],
+    ) -> dict[str, Any]:
+        """Minimize rehearsal dialogue and compute post-rehearsal breakdown via ModelGateway.
+
+        Drops all Speaker.OTHER counterpart turns, scrubs deterministic PII identifiers,
+        validates non-sensitive content, and guarantees authentic_mastery_updated == False.
+        """
+        now = self.now()
+        learner_turns = [t for t in dialogue_turns if t.speaker is Speaker.LEARNER]
+        if not learner_turns:
+            return {
+                "type": "breakdown_summary",
+                "rehearsal_id": entry.rehearsal_id,
+                "situation": entry.service.scenario.situation.value,
+                "target_function": entry.service.scenario.target_function,
+                "state": entry.service.state.value,
+                "committed_turn_count": len(entry.committed_sequences),
+                "minimized_excerpts": [],
+                "other_speaker_transcript_retained": False,
+                "criteria": [],
+                "breakdowns": [],
+                "model_version": "none_no_learner_turns",
+                "fallback_used": True,
+                "raw_pcm_retained_bytes": len(self.store.rehearsal_raw_audio),
+                "authentic_mastery_updated": False,
+                "provenance": "fixture",
+            }
+
+        source = SourceTranscript(
+            reference=f"rehearsal-ws:{entry.rehearsal_id}",
+            learner_id=entry.learner_id,
+            recorded_at=now,
+            capture_mode=CaptureMode.CONSENTED_CONVERSATION,
+            situation=entry.service.scenario.situation,
+            turns=tuple(dialogue_turns),
+            consent_attested=True,
+            all_participants_consented=True,
+            revoked=False,
+            retention_policy_present=True,
+            provenance="fixture",
+        )
+        minimized = minimize_transcript(source, minimized_at=now)
+        raw_extraction = self.breakdown_extractor.extract(
+            minimized,
+            self.rubric,
+            correlation_id=f"ws-breakdown:{entry.rehearsal_id}",
+        )
+        return {
+            "type": "breakdown_summary",
+            "rehearsal_id": entry.rehearsal_id,
+            "situation": entry.service.scenario.situation.value,
+            "target_function": entry.service.scenario.target_function,
+            "state": entry.service.state.value,
+            "committed_turn_count": len(entry.committed_sequences),
+            "minimized_excerpts": [
+                {
+                    "text": ex.text,
+                    "start_ms": ex.start_ms,
+                    "end_ms": ex.end_ms,
+                    "confidence": ex.confidence,
+                }
+                for ex in minimized.self_excerpts
+            ],
+            "other_speaker_transcript_retained": False,
+            "criteria": [
+                {
+                    "criterion_id": c.criterion_id,
+                    "result": c.result.value,
+                    "self_evidence_excerpt": c.self_evidence_excerpt,
+                    "model_confidence": c.model_confidence,
+                }
+                for c in raw_extraction.criteria
+            ],
+            "breakdowns": [
+                {
+                    "code": b.code.value,
+                    "description": b.description,
+                    "self_evidence_excerpt": b.self_evidence_excerpt,
+                    "model_confidence": b.model_confidence,
+                }
+                for b in raw_extraction.breakdowns
+            ],
+            "model_version": raw_extraction.model_version,
+            "fallback_used": raw_extraction.fallback_used,
+            "raw_pcm_retained_bytes": len(self.store.rehearsal_raw_audio),
+            "authentic_mastery_updated": False,
+            "provenance": "fixture",
+        }

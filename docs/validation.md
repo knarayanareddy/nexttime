@@ -7,15 +7,15 @@ Recorded 2026-10-24. Project tests, OpenAPI contract checks, wheel/sdist builds,
 | Check | Result |
 | --- | --- |
 | Ruff lint + format check | Passed (`ruff check .` and `ruff format --check .`) |
-| Strict mypy | Passed (`0` issues across `44` source files in `packages/` and `services/`) |
-| Unit tests | `97/97` passed |
-| Branch-aware coverage (`domain`, `model-gateway`, `bee-adapter`, `calendar`, `rehearsal`, `minimization`, `bee-bridge`, `api`) | `92.49%` branch coverage (exceeds `90%` gate) |
-| Canonical schema & OpenAPI 3.1 contract tests | `12/12` passed (`real-world-attempt`, `breakdown_propose.v1`, `openapi.v1.json` zero-drift across 23 routes, and pure-stdlib domain AST check) |
+| Strict mypy | Passed (`0` issues across `45` source files in `packages/` and `services/`) |
+| Unit tests | `101/101` passed |
+| Branch-aware coverage (`domain`, `model-gateway`, `bee-adapter`, `calendar`, `rehearsal`, `minimization`, `bee-bridge`, `api`) | `92.63%` branch coverage (exceeds `90%` gate) |
+| Canonical schema & OpenAPI 3.1 contract tests | `12/12` passed (`real-world-attempt`, `breakdown_propose.v1`, `openapi.v1.json` zero-drift across 23 REST routes + `/v1/rehearsal/ws` WebSocket check, and pure-stdlib domain AST check) |
 | Privacy & authorization security tests | `5/5` passed (`AC-NT-019` cross-learner IDOR denial, `SEC-NT-003` learner/bridge token scope separation, consent revocation cascade, calendar zero-title/sensitive-topic exclusion, immediate PCM zeroing, and Bee haptic command prohibition) |
 | Third-party dependency audit | `0` known vulnerabilities (`uv run pip-audit --skip-editable`) |
 | Source distribution + wheel | Built cleanly (`uv build`) |
-| Fixture walking path (`make dev`) | Passed |
-| **Total automated tests** | **`114/114` passed** |
+| Fixture walking path (`make dev`) & CLI rehearsal simulator (`scripts/simulate_rehearsal.py`) | Passed |
+| **Total automated tests** | **`118/118` passed** |
 
 ## Validated local slices
 
@@ -25,7 +25,7 @@ Recorded 2026-10-24. Project tests, OpenAPI contract checks, wheel/sdist builds,
 4. **Calendar ingestion adapter & pre-meeting rehearsal card queue (`FR-NT-008`, `INT-NT-006`, `SEC-NT-006`, `AC-NT-012`):** `services/calendar/nexttime_calendar/` parses RFC 5545 `.ics` feeds and incremental read-only Google Calendar OAuth payloads, drops sensitive topics (`SEC-NT-006`), stores only `calref_<24hex>` opaque IDs with zero raw title retention, matches the 3 supported Dutch situations where a confirmed breakdown exists, enforces quiet-hours notification choices (`21:00–08:00` local), and queues `PreMeetingRehearsalCard` items only after explicit learner confirmation.
 5. **Consented push-to-talk audio chunk transcriber (`INT-NT-004`, `SEC-NT-004`, `SPEC.md §1.2`):** `services/rehearsal/nexttime_rehearsal/` frames 16 kHz mono 16-bit s16le PCM chunks (`<=64 KiB` chunk, `<=30s` turn) using AWS `application/vnd.amazon.eventstream` binary CRC32 framing, rejects continuous/wearable covert mic streams and unapproved Whisper providers, enforces streaming consent, zeroes every PCM `bytearray` buffer in place immediately (`retained_pcm_bytes == 0`), flags `<0.75` confidence, and schedules 24h unsaved transcript deletion.
 6. **Turn-boundary iPhone haptic feedback generator (`INT-NT-003`, `SPEC.md §1.3/§4.1/§8.2`, `ui/DESIGN.md §6–7`):** `packages/domain/nexttime_domain/haptics.py` maps push-to-talk and rehearsal turn boundaries to `SHORT_DOUBLE` and `STEADY_BUZZ` pulse sequences on `ios_rehearsal_client`, rejects unverified Bee wearable haptic commands, blocks real-time mid-speech pacing interruptions and repeated haptics during active recording, and honors system haptic/accessibility settings while preserving visual captions and VoiceOver announcements.
-7. **FastAPI `/v1` rehearsal & learner progress backend (`services/api`):** Exposes `/v1/consents`, `/v1/attempts/ingest`, `/v1/attempts`, `/v1/attempts/{id}/review`, `/v1/attempts/{id}/exclude`, `/v1/calendar/ics-sync`, `/v1/calendar/candidates`, `/v1/calendar/candidates/{id}/confirm`, `/v1/rehearsal-cards`, `/v1/recurrences`, `/v1/recurrences/{id}/calendar-link`, `/v1/recurrences/{id}/rehearsal`, `/v1/rehearsals/{id}`, `/v1/rehearsals/{id}/turns`, `/v1/rehearsals/{id}/transcribe-chunks`, `/v1/rehearsals/{id}/haptics`, `/v1/rehearsals/{id}/complete`, `/v1/progress`, `/v1/export`, and `/v1/account` with RFC 9457 `application/problem+json` errors, 24-hour `Idempotency-Key` enforcement, optimistic `expected_version` / `If-Match` concurrency, 15-minute signed counterpart audio URLs, push-to-talk + accessible `tap`/`text` rehearsal turns that never mutate authentic skill mastery (`AC-NT-015`), and non-gamified linked-attempt `OutcomeComparison` progress history (`AC-NT-016`).
+7. **FastAPI `/v1` rehearsal & learner progress backend + WebSocket streaming (`services/api`, `scripts/simulate_rehearsal.py`):** Exposes `/v1/rehearsal/ws` (bidirectional WebSocket connecting `AudioChunkTranscriber`, `ModelGateway` / `GatewayBreakdownExtractor`, and `PacingHapticsEngine` with immediate turn-boundary PCM deletion) plus `/v1/consents`, `/v1/attempts/ingest`, `/v1/attempts`, `/v1/attempts/{id}/review`, `/v1/attempts/{id}/exclude`, `/v1/calendar/ics-sync`, `/v1/calendar/candidates`, `/v1/calendar/candidates/{id}/confirm`, `/v1/rehearsal-cards`, `/v1/recurrences`, `/v1/recurrences/{id}/calendar-link`, `/v1/recurrences/{id}/rehearsal`, `/v1/rehearsals/{id}`, `/v1/rehearsals/{id}/turns`, `/v1/rehearsals/{id}/transcribe-chunks`, `/v1/rehearsals/{id}/haptics`, `/v1/rehearsals/{id}/complete`, `/v1/progress`, `/v1/export`, and `/v1/account` with RFC 9457 `application/problem+json` errors, 24-hour `Idempotency-Key` enforcement, optimistic `expected_version` / `If-Match` concurrency, 15-minute signed counterpart audio URLs, push-to-talk + accessible `tap`/`text` rehearsal turns that never mutate authentic skill mastery (`AC-NT-015`), and non-gamified linked-attempt `OutcomeComparison` progress history (`AC-NT-016`).
 
 ## Reproduce
 

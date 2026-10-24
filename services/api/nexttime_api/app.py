@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Any
 
-from fastapi import Depends, FastAPI, Header, Query, Request
+from fastapi import Depends, FastAPI, Header, Query, Request, WebSocket
 from fastapi.responses import JSONResponse
 
 from .auth import Principal, require_bridge_principal, require_learner_principal
@@ -42,6 +42,7 @@ from .schemas import (
     TurnTranscriptionResponse,
 )
 from .state import ApiRuntimeState
+from .ws import handle_rehearsal_websocket
 
 
 def create_app(state: ApiRuntimeState | None = None) -> FastAPI:
@@ -541,6 +542,10 @@ def create_app(state: ApiRuntimeState | None = None) -> FastAPI:
                 req=body,
             ),
         )
+
+    @app.websocket("/v1/rehearsal/ws")
+    async def rehearsal_websocket(websocket: WebSocket) -> None:
+        await handle_rehearsal_websocket(websocket, runtime)
 
     @app.get(
         "/v1/progress",

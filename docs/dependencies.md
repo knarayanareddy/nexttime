@@ -4,9 +4,10 @@
 
 - Python `>=3.12,<3.13`; validated with CPython 3.12.12.
 - `uv` (`uv.lock`); Hatchling `1.27.0` builds the source distribution and wheel.
-- Runtime dependencies (`services/api` HTTP boundary only; `packages/domain` remains pure stdlib):
+- Runtime dependencies (`services/api` HTTP/WebSocket boundary only; `packages/domain` remains pure stdlib):
   - `fastapi==0.162.0` (transitively `pydantic==2.14.1`, `starlette==1.9.0`)
   - `uvicorn==0.54.0`
+  - `websockets==15.0.1` (ASGI WebSocket protocol support for `/v1/rehearsal/ws`)
 - Development/audit dependencies:
   - `httpx==0.28.1`
   - `jsonschema[format]==4.25.1`
@@ -25,7 +26,7 @@ make test-security
 # equivalent audit portion: uv run pip-audit --skip-editable
 ```
 
-`uv run pip-audit --skip-editable` ran directly under SSL-capable CPython 3.12.12 on 2026-10-24 and reported zero known vulnerabilities across all 69 locked packages. `--skip-editable` excludes only the local workspace distribution (`nexttime-domain`), not third-party packages.
+`uv run pip-audit --skip-editable` ran directly under SSL-capable CPython 3.12.12 on 2026-10-24 and reported zero known vulnerabilities across all 70 locked packages. `--skip-editable` excludes only the local workspace distribution (`nexttime-domain`), not third-party packages.
 
 Advisory results are point-in-time and do not replace license, secrets, infrastructure, or production privacy/security reviews.
 

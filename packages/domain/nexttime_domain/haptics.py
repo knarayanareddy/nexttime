@@ -43,6 +43,10 @@ class HapticPulseSequence:
     total_duration_ms: int
 
 
+HapticTargetDevice = Literal["ios_rehearsal_client", "cli_rehearsal_simulator"]
+_ALLOWED_HAPTIC_TARGETS = frozenset({"ios_rehearsal_client", "cli_rehearsal_simulator"})
+
+
 @dataclass(frozen=True)
 class HapticFeedbackEvent:
     event_id: str
@@ -51,7 +55,7 @@ class HapticFeedbackEvent:
     trigger: RehearsalPacingTrigger
     pattern: HapticPulsePattern | None
     sequence: HapticPulseSequence | None
-    target_device: Literal["ios_rehearsal_client"]
+    target_device: HapticTargetDevice
     emitted: bool
     suppression_reason: str | None
     visual_caption_key: str
@@ -158,8 +162,13 @@ class RehearsalHapticGenerator:
         cleaned_source = source_event_id.strip()
         if not cleaned_source:
             raise ValueError("source_event_id is required")
-        if target_device != "ios_rehearsal_client":
+        if target_device not in _ALLOWED_HAPTIC_TARGETS:
             raise ValueError("unverified_bee_haptic_command_prohibited")
+        resolved_target: HapticTargetDevice = (
+            "cli_rehearsal_simulator"
+            if target_device == "cli_rehearsal_simulator"
+            else "ios_rehearsal_client"
+        )
         occurred_iso = _iso_utc(occurred_at)
 
         signature = (
@@ -211,7 +220,7 @@ class RehearsalHapticGenerator:
             trigger=trigger,
             pattern=pattern if emitted else None,
             sequence=sequence,
-            target_device="ios_rehearsal_client",
+            target_device=resolved_target,
             emitted=emitted,
             suppression_reason=suppression_reason,
             visual_caption_key=caption_key,
@@ -221,3 +230,6 @@ class RehearsalHapticGenerator:
         )
         self._events_by_key[cleaned_source] = (signature, event)
         return event
+
+
+PacingHapticsEngine = RehearsalHapticGenerator

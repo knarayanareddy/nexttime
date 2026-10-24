@@ -452,7 +452,7 @@ class HapticFeedbackEventResponse(StrictModel):
     trigger: str
     pattern: Literal["SHORT_DOUBLE", "STEADY_BUZZ"] | None
     sequence: HapticPulseSequenceResponse | None
-    target_device: Literal["ios_rehearsal_client"]
+    target_device: Literal["ios_rehearsal_client", "cli_rehearsal_simulator"]
     emitted: bool
     suppression_reason: str | None
     visual_caption_key: str

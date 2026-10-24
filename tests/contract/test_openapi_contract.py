@@ -48,6 +48,9 @@ def test_openapi_v1_contract_has_no_drift_and_covers_rehearsal_and_progress_rout
         assert route in committed["paths"], f"Missing route {route}"
         assert methods.issubset(set(committed["paths"][route].keys()))
 
+    ws_paths = {getattr(r, "path", None) for r in create_app().routes}
+    assert "/v1/rehearsal/ws" in ws_paths, "Missing WebSocket route /v1/rehearsal/ws"
+
 
 def test_domain_package_remains_pure_stdlib_without_framework_or_cloud_imports() -> None:
     forbidden = {

@@ -9,10 +9,12 @@ from .aws_eventstream import (
     parse_transcript_event_frame,
 )
 from .transcriber import (
+    ALLOWED_PTT_CAPTURE_ORIGINS,
     MAX_CHUNK_BYTES,
     MAX_PTT_TURN_DURATION_MS,
     REHEARSAL_MAPPING_CONFIDENCE_THRESHOLD,
     REQUIRED_SAMPLE_RATE_HZ,
+    AudioChunkTranscriber,
     ChunkDeletionReceipt,
     ConsentedAudioChunkTranscriber,
     CovertCaptureProhibitedError,
@@ -26,6 +28,8 @@ from .transcriber import (
 )
 
 __all__ = [
+    "ALLOWED_PTT_CAPTURE_ORIGINS",
+    "AudioChunkTranscriber",
     "ChunkDeletionReceipt",
     "ConsentedAudioChunkTranscriber",
     "CovertCaptureProhibitedError",

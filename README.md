@@ -13,7 +13,8 @@ Requirements: Python 3.12 (`>=3.12,<3.13`), `uv`, and `make`. Dependencies are p
 ```bash
 make setup                 # uv sync --frozen and safe .env.local
 make dev                   # deterministic domain + rehearsal walking skeleton
-make dev-api               # run FastAPI /v1 server on 0.0.0.0:8000
+make dev-api               # run FastAPI /v1 server (REST + /v1/rehearsal/ws) on 0.0.0.0:8000
+uv run python scripts/simulate_rehearsal.py   # interactive Dutch rehearsal CLI simulator
 make lint typecheck        # ruff check + format check + strict mypy across all packages/services
 make test-unit             # >=90% branch coverage across domain, adapters, workers, and API
 make test-contract         # JSON Schema, OpenAPI 3.1 zero-drift, and stdlib boundary checks
@@ -36,7 +37,8 @@ Native iOS, live Bee hardware, PostgreSQL/S3 integration, CDK infrastructure, E2
 | [`services/rehearsal/nexttime_rehearsal/`](./services/rehearsal/nexttime_rehearsal/) | Bounded push-to-talk Dutch audio chunk transcriber with AWS `vnd.amazon.eventstream` CRC32 codec, streaming consent gate, covert-mic rejection, and immediate in-place PCM zeroing |
 | [`services/bee-bridge/nexttime_bee_bridge/`](./services/bee-bridge/nexttime_bee_bridge/) | Local consented Bee transcript ingestion listener (`nexttime-bee-bridge` CLI + lease cursor) |
 | [`services/minimization/nexttime_minimization/`](./services/minimization/nexttime_minimization/) | `InMemoryArtifactStore` and 4-stage `DeletionPipelineWorker` (revocation, TTL sweeps, overdue alarms, tombstones) |
-| [`services/api/nexttime_api/`](./services/api/nexttime_api/) | FastAPI `/v1` backend for consents, ingestion, attempt review, calendar candidate sync & confirmation, recurrence/rehearsal sessions, PTT chunk transcription, rehearsal haptics, learner progress history, export, and account deletion |
+| [`services/api/nexttime_api/`](./services/api/nexttime_api/) | FastAPI `/v1` backend + `/v1/rehearsal/ws` bidirectional WebSocket for consents, ingestion, attempt review, calendar candidate sync & confirmation, recurrence/rehearsal sessions, PTT chunk transcription, rehearsal haptics, learner progress history, export, and account deletion |
+| [`scripts/simulate_rehearsal.py`](./scripts/simulate_rehearsal.py) | Interactive terminal Dutch rehearsal simulator supporting `.wav`/`.pcm` audio upload, typed/tapped phrases, console haptic pulses, and post-rehearsal breakdown summaries without Xcode/SwiftUI |
 | [`packages/contracts/`](./packages/contracts/) | Attempt schema copy, model-gateway schemas, and drift-checked `openapi.v1.json` |
 | [`packages/rubrics/`](./packages/rubrics/) | Draft educator-review-required situation rubrics |
 | [`tests/`](./tests/) | Unit, contract, and security/privacy test suites |

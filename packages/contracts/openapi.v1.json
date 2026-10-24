@@ -1276,7 +1276,10 @@
             "title": "Suppression Reason"
           },
           "target_device": {
-            "const": "ios_rehearsal_client",
+            "enum": [
+              "ios_rehearsal_client",
+              "cli_rehearsal_simulator"
+            ],
             "title": "Target Device",
             "type": "string"
           },

@@ -388,6 +388,188 @@
         "title": "BridgeSegmentPayload",
         "type": "object"
       },
+      "CalendarCandidateConfirmRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "notification_behavior": {
+            "anyOf": [
+              {
+                "enum": [
+                  "local_notification",
+                  "open_template_only"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notification Behavior"
+          },
+          "rehearsal_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rehearsal At"
+          }
+        },
+        "title": "CalendarCandidateConfirmRequest",
+        "type": "object"
+      },
+      "CalendarCandidateListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CalendarCandidateResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "CalendarCandidateListResponse",
+        "type": "object"
+      },
+      "CalendarCandidateResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "calendar_event_reference": {
+            "title": "Calendar Event Reference",
+            "type": "string"
+          },
+          "candidate_id": {
+            "title": "Candidate Id",
+            "type": "string"
+          },
+          "confirmation_state": {
+            "enum": [
+              "awaiting_learner_confirmation",
+              "confirmed",
+              "dismissed"
+            ],
+            "title": "Confirmation State",
+            "type": "string"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "learner_id": {
+            "title": "Learner Id",
+            "type": "string"
+          },
+          "matched_attempt_id": {
+            "title": "Matched Attempt Id",
+            "type": "string"
+          },
+          "matched_breakdown_id": {
+            "title": "Matched Breakdown Id",
+            "type": "string"
+          },
+          "proposed_rehearsal_at": {
+            "title": "Proposed Rehearsal At",
+            "type": "string"
+          },
+          "provenance": {
+            "enum": [
+              "fixture",
+              "live"
+            ],
+            "title": "Provenance",
+            "type": "string"
+          },
+          "provider": {
+            "enum": [
+              "icalendar",
+              "google_calendar"
+            ],
+            "title": "Provider",
+            "type": "string"
+          },
+          "quiet_hours": {
+            "title": "Quiet Hours",
+            "type": "boolean"
+          },
+          "scheduled_for": {
+            "title": "Scheduled For",
+            "type": "string"
+          },
+          "situation": {
+            "title": "Situation",
+            "type": "string"
+          },
+          "time_zone": {
+            "title": "Time Zone",
+            "type": "string"
+          }
+        },
+        "required": [
+          "candidate_id",
+          "learner_id",
+          "provider",
+          "calendar_event_reference",
+          "situation",
+          "matched_attempt_id",
+          "matched_breakdown_id",
+          "scheduled_for",
+          "proposed_rehearsal_at",
+          "time_zone",
+          "quiet_hours",
+          "confirmation_state",
+          "provenance",
+          "created_at"
+        ],
+        "title": "CalendarCandidateResponse",
+        "type": "object"
+      },
+      "CalendarIcsSyncRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "default_time_zone": {
+            "default": "Europe/Amsterdam",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Default Time Zone",
+            "type": "string"
+          },
+          "horizon_days": {
+            "default": 14,
+            "maximum": 60.0,
+            "minimum": 1.0,
+            "title": "Horizon Days",
+            "type": "integer"
+          },
+          "ics_payload": {
+            "maxLength": 262144,
+            "minLength": 15,
+            "title": "Ics Payload",
+            "type": "string"
+          },
+          "provenance": {
+            "default": "fixture",
+            "enum": [
+              "fixture",
+              "live"
+            ],
+            "title": "Provenance",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ics_payload"
+        ],
+        "title": "CalendarIcsSyncRequest",
+        "type": "object"
+      },
       "CalendarLinkRequest": {
         "additionalProperties": false,
         "properties": {
@@ -414,6 +596,103 @@
           "calendar_event_reference"
         ],
         "title": "CalendarLinkRequest",
+        "type": "object"
+      },
+      "CalendarSyncSummaryResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "cancelled_count": {
+            "title": "Cancelled Count",
+            "type": "integer"
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/CalendarCandidateResponse"
+            },
+            "title": "Candidates",
+            "type": "array"
+          },
+          "excluded_sensitive_count": {
+            "title": "Excluded Sensitive Count",
+            "type": "integer"
+          },
+          "ignored_unrelated_count": {
+            "title": "Ignored Unrelated Count",
+            "type": "integer"
+          },
+          "learner_id": {
+            "title": "Learner Id",
+            "type": "string"
+          },
+          "next_sync_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Sync Token"
+          },
+          "provenance": {
+            "enum": [
+              "fixture",
+              "live"
+            ],
+            "title": "Provenance",
+            "type": "string"
+          },
+          "provider": {
+            "enum": [
+              "icalendar",
+              "google_calendar"
+            ],
+            "title": "Provider",
+            "type": "string"
+          }
+        },
+        "required": [
+          "learner_id",
+          "provider",
+          "candidates",
+          "excluded_sensitive_count",
+          "ignored_unrelated_count",
+          "cancelled_count",
+          "next_sync_token",
+          "provenance"
+        ],
+        "title": "CalendarSyncSummaryResponse",
+        "type": "object"
+      },
+      "ChunkDeletionReceiptResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "bytes_zeroed": {
+            "title": "Bytes Zeroed",
+            "type": "integer"
+          },
+          "deleted_at": {
+            "title": "Deleted At",
+            "type": "string"
+          },
+          "deleted_immediately": {
+            "const": true,
+            "title": "Deleted Immediately",
+            "type": "boolean"
+          },
+          "sequence_id": {
+            "title": "Sequence Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "sequence_id",
+          "bytes_zeroed",
+          "deleted_immediately",
+          "deleted_at"
+        ],
+        "title": "ChunkDeletionReceiptResponse",
         "type": "object"
       },
       "ConsentCreateRequest": {
@@ -879,6 +1158,209 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
+      "HapticEventRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "haptics_enabled": {
+            "default": true,
+            "title": "Haptics Enabled",
+            "type": "boolean"
+          },
+          "reduced_motion": {
+            "default": false,
+            "title": "Reduced Motion",
+            "type": "boolean"
+          },
+          "source_event_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Source Event Id",
+            "type": "string"
+          },
+          "target_device": {
+            "default": "ios_rehearsal_client",
+            "maxLength": 64,
+            "title": "Target Device",
+            "type": "string"
+          },
+          "trigger": {
+            "enum": [
+              "ptt_recording_started",
+              "ptt_recording_released",
+              "counterpart_turn_ready",
+              "support_repair_offered",
+              "turn_budget_boundary",
+              "rehearsal_completed",
+              "mid_speech_pacing_interrupt"
+            ],
+            "title": "Trigger",
+            "type": "string"
+          },
+          "turn_id": {
+            "anyOf": [
+              {
+                "maxLength": 32,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Turn Id"
+          }
+        },
+        "required": [
+          "source_event_id",
+          "trigger"
+        ],
+        "title": "HapticEventRequest",
+        "type": "object"
+      },
+      "HapticFeedbackEventResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "duplicate": {
+            "title": "Duplicate",
+            "type": "boolean"
+          },
+          "emitted": {
+            "title": "Emitted",
+            "type": "boolean"
+          },
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          },
+          "pattern": {
+            "anyOf": [
+              {
+                "enum": [
+                  "SHORT_DOUBLE",
+                  "STEADY_BUZZ"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pattern"
+          },
+          "rehearsal_id": {
+            "title": "Rehearsal Id",
+            "type": "string"
+          },
+          "sequence": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HapticPulseSequenceResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "suppression_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suppression Reason"
+          },
+          "target_device": {
+            "const": "ios_rehearsal_client",
+            "title": "Target Device",
+            "type": "string"
+          },
+          "trigger": {
+            "title": "Trigger",
+            "type": "string"
+          },
+          "turn_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Turn Id"
+          },
+          "visual_caption_key": {
+            "title": "Visual Caption Key",
+            "type": "string"
+          },
+          "voiceover_announcement": {
+            "title": "Voiceover Announcement",
+            "type": "string"
+          }
+        },
+        "required": [
+          "event_id",
+          "rehearsal_id",
+          "turn_id",
+          "trigger",
+          "pattern",
+          "sequence",
+          "target_device",
+          "emitted",
+          "suppression_reason",
+          "visual_caption_key",
+          "voiceover_announcement",
+          "duplicate",
+          "created_at"
+        ],
+        "title": "HapticFeedbackEventResponse",
+        "type": "object"
+      },
+      "HapticPulseSequenceResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "gap_durations_ms": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Gap Durations Ms",
+            "type": "array"
+          },
+          "pattern": {
+            "enum": [
+              "SHORT_DOUBLE",
+              "STEADY_BUZZ"
+            ],
+            "title": "Pattern",
+            "type": "string"
+          },
+          "pulse_durations_ms": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Pulse Durations Ms",
+            "type": "array"
+          },
+          "total_duration_ms": {
+            "title": "Total Duration Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "pattern",
+          "pulse_durations_ms",
+          "gap_durations_ms",
+          "total_duration_ms"
+        ],
+        "title": "HapticPulseSequenceResponse",
+        "type": "object"
+      },
       "HealthResponse": {
         "additionalProperties": false,
         "properties": {
@@ -973,6 +1455,151 @@
           "causal_claim"
         ],
         "title": "OutcomeComparisonResponse",
+        "type": "object"
+      },
+      "PcmChunkPayload": {
+        "additionalProperties": false,
+        "properties": {
+          "channels": {
+            "default": 1,
+            "title": "Channels",
+            "type": "integer"
+          },
+          "pcm_base64": {
+            "maxLength": 100000,
+            "minLength": 4,
+            "title": "Pcm Base64",
+            "type": "string"
+          },
+          "sample_rate_hz": {
+            "default": 16000,
+            "title": "Sample Rate Hz",
+            "type": "integer"
+          },
+          "sample_width_bytes": {
+            "default": 2,
+            "title": "Sample Width Bytes",
+            "type": "integer"
+          },
+          "sequence_id": {
+            "minimum": 1.0,
+            "title": "Sequence Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "sequence_id",
+          "pcm_base64"
+        ],
+        "title": "PcmChunkPayload",
+        "type": "object"
+      },
+      "PreMeetingRehearsalCardResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "attempt_id": {
+            "title": "Attempt Id",
+            "type": "string"
+          },
+          "breakdown_id": {
+            "title": "Breakdown Id",
+            "type": "string"
+          },
+          "calendar_event_reference": {
+            "title": "Calendar Event Reference",
+            "type": "string"
+          },
+          "candidate_id": {
+            "title": "Candidate Id",
+            "type": "string"
+          },
+          "card_id": {
+            "title": "Card Id",
+            "type": "string"
+          },
+          "estimated_seconds": {
+            "title": "Estimated Seconds",
+            "type": "integer"
+          },
+          "event_source": {
+            "const": "explicit_calendar_link",
+            "title": "Event Source",
+            "type": "string"
+          },
+          "learner_id": {
+            "title": "Learner Id",
+            "type": "string"
+          },
+          "notification_behavior": {
+            "title": "Notification Behavior",
+            "type": "string"
+          },
+          "provenance": {
+            "enum": [
+              "fixture",
+              "live"
+            ],
+            "title": "Provenance",
+            "type": "string"
+          },
+          "quiet_hours": {
+            "title": "Quiet Hours",
+            "type": "boolean"
+          },
+          "recurrence_id": {
+            "title": "Recurrence Id",
+            "type": "string"
+          },
+          "rehearsal_at": {
+            "title": "Rehearsal At",
+            "type": "string"
+          },
+          "scheduled_for": {
+            "title": "Scheduled For",
+            "type": "string"
+          },
+          "situation": {
+            "title": "Situation",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "cancelled"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "target_function": {
+            "title": "Target Function",
+            "type": "string"
+          },
+          "time_zone": {
+            "title": "Time Zone",
+            "type": "string"
+          }
+        },
+        "required": [
+          "card_id",
+          "learner_id",
+          "candidate_id",
+          "recurrence_id",
+          "attempt_id",
+          "breakdown_id",
+          "situation",
+          "target_function",
+          "scheduled_for",
+          "rehearsal_at",
+          "time_zone",
+          "estimated_seconds",
+          "quiet_hours",
+          "notification_behavior",
+          "event_source",
+          "calendar_event_reference",
+          "status",
+          "provenance"
+        ],
+        "title": "PreMeetingRehearsalCardResponse",
         "type": "object"
       },
       "ProgressHistoryResponse": {
@@ -1190,6 +1817,23 @@
           "notification_behavior"
         ],
         "title": "RecurrenceResponse",
+        "type": "object"
+      },
+      "RehearsalCardListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PreMeetingRehearsalCardResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "RehearsalCardListResponse",
         "type": "object"
       },
       "RehearsalCompleteRequest": {
@@ -1670,6 +2314,138 @@
           "text_en"
         ],
         "title": "SupportPhraseResponse",
+        "type": "object"
+      },
+      "TranscribeChunksRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "capture_origin": {
+            "default": "iphone_rehearsal_ptt",
+            "maxLength": 64,
+            "title": "Capture Origin",
+            "type": "string"
+          },
+          "chunks": {
+            "items": {
+              "$ref": "#/components/schemas/PcmChunkPayload"
+            },
+            "maxItems": 64,
+            "minItems": 1,
+            "title": "Chunks",
+            "type": "array"
+          },
+          "continuous_stream": {
+            "default": false,
+            "title": "Continuous Stream",
+            "type": "boolean"
+          },
+          "save_self_excerpt": {
+            "default": false,
+            "title": "Save Self Excerpt",
+            "type": "boolean"
+          },
+          "streaming_transcription_consented": {
+            "title": "Streaming Transcription Consented",
+            "type": "boolean"
+          },
+          "turn_event_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Turn Event Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "turn_event_id",
+          "streaming_transcription_consented",
+          "chunks"
+        ],
+        "title": "TranscribeChunksRequest",
+        "type": "object"
+      },
+      "TurnTranscriptionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "below_confidence_threshold": {
+            "title": "Below Confidence Threshold",
+            "type": "boolean"
+          },
+          "chunk_receipts": {
+            "items": {
+              "$ref": "#/components/schemas/ChunkDeletionReceiptResponse"
+            },
+            "title": "Chunk Receipts",
+            "type": "array"
+          },
+          "confidence": {
+            "title": "Confidence",
+            "type": "number"
+          },
+          "learner_id": {
+            "title": "Learner Id",
+            "type": "string"
+          },
+          "partial_count": {
+            "title": "Partial Count",
+            "type": "integer"
+          },
+          "provenance": {
+            "enum": [
+              "fixture",
+              "live"
+            ],
+            "title": "Provenance",
+            "type": "string"
+          },
+          "provider": {
+            "const": "aws_transcribe_streaming",
+            "title": "Provider",
+            "type": "string"
+          },
+          "rehearsal_id": {
+            "title": "Rehearsal Id",
+            "type": "string"
+          },
+          "retained_pcm_bytes": {
+            "const": 0,
+            "title": "Retained Pcm Bytes",
+            "type": "integer"
+          },
+          "transcript": {
+            "title": "Transcript",
+            "type": "string"
+          },
+          "transcript_delete_after": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transcript Delete After"
+          },
+          "turn_event_id": {
+            "title": "Turn Event Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "turn_event_id",
+          "rehearsal_id",
+          "learner_id",
+          "transcript",
+          "confidence",
+          "below_confidence_threshold",
+          "partial_count",
+          "chunk_receipts",
+          "retained_pcm_bytes",
+          "transcript_delete_after",
+          "provider",
+          "provenance"
+        ],
+        "title": "TurnTranscriptionResponse",
         "type": "object"
       },
       "ValidationError": {
@@ -2204,6 +2980,214 @@
         ]
       }
     },
+    "/v1/calendar/candidates": {
+      "get": {
+        "operationId": "list_calendar_candidates_v1_calendar_candidates_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarCandidateListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Calendar Candidates",
+        "tags": [
+          "recurrences"
+        ]
+      }
+    },
+    "/v1/calendar/candidates/{candidate_id}/confirm": {
+      "post": {
+        "operationId": "confirm_calendar_candidate_v1_calendar_candidates__candidate_id__confirm_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "candidate_id",
+            "required": true,
+            "schema": {
+              "title": "Candidate Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalendarCandidateConfirmRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreMeetingRehearsalCardResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Confirm Calendar Candidate",
+        "tags": [
+          "recurrences"
+        ]
+      }
+    },
+    "/v1/calendar/ics-sync": {
+      "post": {
+        "operationId": "sync_ics_calendar_v1_calendar_ics_sync_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalendarIcsSyncRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarSyncSummaryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Sync Ics Calendar",
+        "tags": [
+          "recurrences"
+        ]
+      }
+    },
     "/v1/consents": {
       "post": {
         "operationId": "create_consent_v1_consents_post",
@@ -2694,6 +3678,55 @@
         ]
       }
     },
+    "/v1/rehearsal-cards": {
+      "get": {
+        "operationId": "list_rehearsal_cards_v1_rehearsal_cards_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RehearsalCardListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Rehearsal Cards",
+        "tags": [
+          "rehearsals"
+        ]
+      }
+    },
     "/v1/rehearsals/{rehearsal_id}": {
       "get": {
         "operationId": "get_rehearsal_v1_rehearsals__rehearsal_id__get",
@@ -2831,6 +3864,174 @@
           }
         },
         "summary": "Complete Rehearsal",
+        "tags": [
+          "rehearsals"
+        ]
+      }
+    },
+    "/v1/rehearsals/{rehearsal_id}/haptics": {
+      "post": {
+        "operationId": "emit_rehearsal_haptic_v1_rehearsals__rehearsal_id__haptics_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rehearsal_id",
+            "required": true,
+            "schema": {
+              "title": "Rehearsal Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HapticEventRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HapticFeedbackEventResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Emit Rehearsal Haptic",
+        "tags": [
+          "rehearsals"
+        ]
+      }
+    },
+    "/v1/rehearsals/{rehearsal_id}/transcribe-chunks": {
+      "post": {
+        "operationId": "transcribe_rehearsal_chunks_v1_rehearsals__rehearsal_id__transcribe_chunks_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rehearsal_id",
+            "required": true,
+            "schema": {
+              "title": "Rehearsal Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TranscribeChunksRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TurnTranscriptionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Transcribe Rehearsal Chunks",
         "tags": [
           "rehearsals"
         ]

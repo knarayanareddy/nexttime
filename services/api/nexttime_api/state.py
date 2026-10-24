@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import base64
+import binascii
 import hashlib
 import hmac
 import json
@@ -13,6 +15,13 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from nexttime_bee_adapter import BeeTranscript, LocalSpoolBeeAdapter
 from nexttime_bee_bridge import BeeIngestionBridge, CaptureMetadata
+from nexttime_calendar import (
+    CalendarAdapterError,
+    CalendarRecurrenceCandidate,
+    CalendarSyncService,
+    ICalendarFeedAdapter,
+    PreMeetingRehearsalCard,
+)
 from nexttime_domain import (
     AttemptReviewService,
     AuthenticProgressService,
@@ -24,9 +33,13 @@ from nexttime_domain import (
     CriterionResult,
     DeletionJob,
     FixtureRehearsalService,
+    HapticFeedbackEvent,
+    HapticPreferences,
     NotificationBehavior,
     PracticeMode,
     RawSpeakerSegment,
+    RehearsalHapticGenerator,
+    RehearsalPacingTrigger,
     Rubric,
     SeparationMethod,
     Situation,
@@ -37,6 +50,13 @@ from nexttime_domain import (
     rubric_from_mapping,
 )
 from nexttime_minimization import DeletionPipelineWorker, InMemoryArtifactStore
+from nexttime_rehearsal import (
+    ConsentedAudioChunkTranscriber,
+    CovertCaptureProhibitedError,
+    DeterministicFixtureTranscribeTransport,
+    PcmAudioChunk,
+    TranscribeTransportError,
+)
 
 from .auth import TokenAuthenticator
 from .idempotency import IdempotencyStore
@@ -45,12 +65,16 @@ from .schemas import (
     AttemptExcludeRequest,
     AttemptIngestRequest,
     AttemptReviewRequest,
+    CalendarCandidateConfirmRequest,
+    CalendarIcsSyncRequest,
     CalendarLinkRequest,
     ConsentCreateRequest,
+    HapticEventRequest,
     RecurrenceCreateRequest,
     RehearsalCompleteRequest,
     RehearsalCreateRequest,
     RehearsalTurnSubmitRequest,
+    TranscribeChunksRequest,
 )
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -111,6 +135,9 @@ class RehearsalSessionEntry:
     learner_id: str
     breakdown_id: str
     service: FixtureRehearsalService
+    haptics: RehearsalHapticGenerator = field(
+        default_factory=lambda: RehearsalHapticGenerator(rehearsal_id="pending")
+    )
     committed_sequences: list[int] = field(default_factory=list)
     recorded_in_progress: bool = False
 
@@ -140,6 +167,10 @@ class ApiRuntimeState:
             store=self.store,
             deletion_worker=self.deletion_worker,
             rubric=self.rubric,
+        )
+        self.calendar_sync = CalendarSyncService()
+        self.chunk_transcriber = ConsentedAudioChunkTranscriber(
+            transport=DeterministicFixtureTranscribeTransport()
         )
         self._progress_by_learner: dict[str, AuthenticProgressService] = {}
         self._rehearsals: dict[str, RehearsalSessionEntry] = {}
@@ -832,6 +863,7 @@ class ApiRuntimeState:
             learner_id=actor_id,
             breakdown_id=req.breakdown_id,
             service=rehearsal_svc,
+            haptics=RehearsalHapticGenerator(rehearsal_id=rehearsal_id),
         )
         self._rehearsals[rehearsal_id] = entry
         self._rehearsal_by_recurrence[pair_key] = rehearsal_id
@@ -1135,6 +1167,334 @@ class ApiRuntimeState:
             ) from error
 
         self._progress_by_learner.pop(actor_id, None)
+        self.calendar_sync.purge_learner(actor_id)
         for rid in [rid for rid, entry in self._rehearsals.items() if entry.learner_id == actor_id]:
             del self._rehearsals[rid]
         return self._serialize_job(job)
+
+    @staticmethod
+    def _serialize_calendar_candidate(candidate: CalendarRecurrenceCandidate) -> dict[str, Any]:
+        return {
+            "candidate_id": candidate.candidate_id,
+            "learner_id": candidate.learner_id,
+            "provider": candidate.provider,
+            "calendar_event_reference": candidate.calendar_event_reference,
+            "situation": candidate.situation.value,
+            "matched_attempt_id": candidate.matched_attempt_id,
+            "matched_breakdown_id": candidate.matched_breakdown_id,
+            "scheduled_for": candidate.scheduled_for,
+            "proposed_rehearsal_at": candidate.proposed_rehearsal_at,
+            "time_zone": candidate.time_zone,
+            "quiet_hours": candidate.quiet_hours,
+            "confirmation_state": candidate.confirmation_state,
+            "provenance": candidate.provenance,
+            "created_at": candidate.created_at,
+        }
+
+    @staticmethod
+    def _serialize_rehearsal_card(card: PreMeetingRehearsalCard) -> dict[str, Any]:
+        return {
+            "card_id": card.card_id,
+            "learner_id": card.learner_id,
+            "candidate_id": card.candidate_id,
+            "recurrence_id": card.recurrence_id,
+            "attempt_id": card.attempt_id,
+            "breakdown_id": card.breakdown_id,
+            "situation": card.situation.value,
+            "target_function": card.target_function,
+            "scheduled_for": card.scheduled_for,
+            "rehearsal_at": card.rehearsal_at,
+            "time_zone": card.time_zone,
+            "estimated_seconds": card.estimated_seconds,
+            "quiet_hours": card.quiet_hours,
+            "notification_behavior": card.notification_behavior.value,
+            "event_source": card.event_source,
+            "calendar_event_reference": card.calendar_event_reference,
+            "status": card.status,
+            "provenance": card.provenance,
+        }
+
+    async def sync_ics_calendar(
+        self,
+        *,
+        actor_id: str,
+        req: CalendarIcsSyncRequest,
+    ) -> dict[str, Any]:
+        try:
+            ZoneInfo(req.default_time_zone)
+        except ZoneInfoNotFoundError as error:
+            raise ApiProblemError(
+                status=422,
+                code="invalid_time_zone",
+                title="Invalid IANA time zone",
+                detail=f"Unknown time zone '{req.default_time_zone}'.",
+            ) from error
+
+        adapter = ICalendarFeedAdapter(
+            req.ics_payload,
+            default_time_zone=req.default_time_zone,
+            provenance=req.provenance,
+        )
+        now = self.now()
+        try:
+            summary = await self.calendar_sync.sync_candidates(
+                learner_id=actor_id,
+                provider="icalendar",
+                source=adapter,
+                confirmed_attempts=list(self.store.attempts.values()),
+                now=now,
+                horizon_days=req.horizon_days,
+            )
+        except CalendarAdapterError as error:
+            raise ApiProblemError(
+                status=422,
+                code=error.code,
+                title="Invalid iCalendar payload",
+                detail=error.detail,
+            ) from error
+
+        return {
+            "learner_id": summary.learner_id,
+            "provider": summary.provider,
+            "candidates": [self._serialize_calendar_candidate(c) for c in summary.candidates],
+            "excluded_sensitive_count": summary.excluded_sensitive_count,
+            "ignored_unrelated_count": summary.ignored_unrelated_count,
+            "cancelled_count": summary.cancelled_count,
+            "next_sync_token": summary.next_sync_token,
+            "provenance": summary.provenance,
+        }
+
+    def list_calendar_candidates(self, *, actor_id: str) -> dict[str, Any]:
+        items = [
+            self._serialize_calendar_candidate(c)
+            for c in self.calendar_sync.list_candidates(actor_learner_id=actor_id)
+        ]
+        return {"items": items}
+
+    def confirm_calendar_candidate(
+        self,
+        *,
+        actor_id: str,
+        candidate_id: str,
+        req: CalendarCandidateConfirmRequest,
+    ) -> dict[str, Any]:
+        behavior = (
+            NotificationBehavior(req.notification_behavior)
+            if req.notification_behavior is not None
+            else None
+        )
+        try:
+            card = self.calendar_sync.confirm_candidate_and_queue_card(
+                actor_learner_id=actor_id,
+                candidate_id=candidate_id,
+                confirmed_at=self.now(),
+                rehearsal_at=req.rehearsal_at,
+                notification_behavior=behavior,
+            )
+        except KeyError as error:
+            raise ApiProblemError(
+                status=404,
+                code="calendar_candidate_not_found",
+                title="Calendar candidate not found",
+                detail="The requested calendar candidate does not exist.",
+            ) from error
+        except PermissionError as error:
+            raise ApiProblemError(
+                status=403,
+                code="access_denied",
+                title="Access denied",
+                detail=str(error),
+            ) from error
+        except ValueError as error:
+            code = str(error)
+            raise ApiProblemError(
+                status=422,
+                code=code,
+                title="Calendar candidate confirmation failed",
+                detail=f"Cannot confirm calendar candidate ({code}).",
+            ) from error
+
+        doc = self.store.attempts.get(card.attempt_id)
+        if doc is not None and not doc["context"].get("recurrence_id"):
+            doc["context"]["recurrence_id"] = card.recurrence_id
+            prog_attempts = self._progress_for(actor_id)._attempts  # noqa: SLF001
+            if card.attempt_id in prog_attempts:
+                prog_attempts[card.attempt_id]["context"]["recurrence_id"] = card.recurrence_id
+
+        self.store.recurrences[card.recurrence_id] = {
+            "recurrence_id": card.recurrence_id,
+            "learner_id": actor_id,
+            "attempt_id": card.attempt_id,
+            "situation": card.situation.value,
+            "scheduled_for": card.scheduled_for,
+            "rehearsal_at": card.rehearsal_at,
+            "candidate_rehearsal_at": card.rehearsal_at,
+            "time_zone": card.time_zone,
+            "source": "explicit_calendar_link",
+            "calendar_event_reference": card.calendar_event_reference,
+            "quiet_hours": card.quiet_hours,
+            "selection_required": False,
+            "notification_behavior": card.notification_behavior.value,
+            "created_at": _iso_utc(self.now()),
+        }
+        return self._serialize_rehearsal_card(card)
+
+    def list_rehearsal_cards(self, *, actor_id: str) -> dict[str, Any]:
+        return {
+            "items": [
+                self._serialize_rehearsal_card(card)
+                for card in self.calendar_sync.list_queued_cards(actor_learner_id=actor_id)
+            ]
+        }
+
+    async def transcribe_rehearsal_chunks(
+        self,
+        *,
+        actor_id: str,
+        rehearsal_id: str,
+        req: TranscribeChunksRequest,
+    ) -> dict[str, Any]:
+        entry = self._require_owned_rehearsal(actor_id=actor_id, rehearsal_id=rehearsal_id)
+        pcm_chunks: list[PcmAudioChunk] = []
+        for item in req.chunks:
+            try:
+                raw_bytes = base64.b64decode(item.pcm_base64, validate=True)
+            except (binascii.Error, ValueError) as error:
+                raise ApiProblemError(
+                    status=422,
+                    code="invalid_pcm_base64",
+                    title="Invalid base64 PCM chunk",
+                    detail="Audio chunk payload is not valid base64.",
+                ) from error
+            pcm_chunks.append(
+                PcmAudioChunk(
+                    sequence_id=item.sequence_id,
+                    pcm_buffer=bytearray(raw_bytes),
+                    sample_rate_hz=item.sample_rate_hz,
+                    channels=item.channels,
+                    sample_width_bytes=item.sample_width_bytes,
+                )
+            )
+
+        try:
+            result = await self.chunk_transcriber.transcribe_ptt_turn(
+                learner_id=actor_id,
+                rehearsal_id=entry.rehearsal_id,
+                turn_event_id=req.turn_event_id,
+                chunks=pcm_chunks,
+                streaming_transcription_consented=req.streaming_transcription_consented,
+                capture_origin=req.capture_origin,
+                continuous_stream=req.continuous_stream,
+                save_self_excerpt=req.save_self_excerpt,
+                transcribed_at=self.now(),
+            )
+        except CovertCaptureProhibitedError as error:
+            raise ApiProblemError(
+                status=403,
+                code=str(error),
+                title="Prohibited audio capture origin",
+                detail="Continuous or non-iPhone push-to-talk audio streaming is prohibited.",
+            ) from error
+        except ConsentError as error:
+            raise ApiProblemError(
+                status=403,
+                code=str(error),
+                title="Streaming transcription consent required",
+                detail="Learner must explicitly consent to push-to-talk streaming transcription.",
+            ) from error
+        except ValueError as error:
+            raise ApiProblemError(
+                status=422,
+                code="invalid_audio_chunk",
+                title="Invalid PCM audio chunk",
+                detail=str(error),
+            ) from error
+        except TranscribeTransportError as error:
+            raise ApiProblemError(
+                status=503,
+                code=error.code,
+                title="Streaming transcription unavailable",
+                detail=error.detail,
+            ) from error
+
+        return {
+            "turn_event_id": result.turn_event_id,
+            "rehearsal_id": result.rehearsal_id,
+            "learner_id": result.learner_id,
+            "transcript": result.transcript,
+            "confidence": result.confidence,
+            "below_confidence_threshold": result.below_confidence_threshold,
+            "partial_count": result.partial_count,
+            "chunk_receipts": [
+                {
+                    "sequence_id": r.sequence_id,
+                    "bytes_zeroed": r.bytes_zeroed,
+                    "deleted_immediately": True,
+                    "deleted_at": r.deleted_at,
+                }
+                for r in result.chunk_receipts
+            ],
+            "retained_pcm_bytes": 0,
+            "transcript_delete_after": result.transcript_delete_after,
+            "provider": result.provider,
+            "provenance": result.provenance,
+        }
+
+    @staticmethod
+    def _serialize_haptic_event(event: HapticFeedbackEvent) -> dict[str, Any]:
+        return {
+            "event_id": event.event_id,
+            "rehearsal_id": event.rehearsal_id,
+            "turn_id": event.turn_id,
+            "trigger": event.trigger.value,
+            "pattern": event.pattern.value if event.pattern is not None else None,
+            "sequence": (
+                {
+                    "pattern": event.sequence.pattern.value,
+                    "pulse_durations_ms": list(event.sequence.pulse_durations_ms),
+                    "gap_durations_ms": list(event.sequence.gap_durations_ms),
+                    "total_duration_ms": event.sequence.total_duration_ms,
+                }
+                if event.sequence is not None
+                else None
+            ),
+            "target_device": "ios_rehearsal_client",
+            "emitted": event.emitted,
+            "suppression_reason": event.suppression_reason,
+            "visual_caption_key": event.visual_caption_key,
+            "voiceover_announcement": event.voiceover_announcement,
+            "duplicate": event.duplicate,
+            "created_at": event.created_at,
+        }
+
+    def emit_rehearsal_haptic(
+        self,
+        *,
+        actor_id: str,
+        rehearsal_id: str,
+        req: HapticEventRequest,
+    ) -> dict[str, Any]:
+        entry = self._require_owned_rehearsal(actor_id=actor_id, rehearsal_id=rehearsal_id)
+        try:
+            event = entry.haptics.generate(
+                source_event_id=req.source_event_id,
+                trigger=RehearsalPacingTrigger(req.trigger),
+                occurred_at=self.now(),
+                turn_id=req.turn_id,
+                target_device=req.target_device,
+                preferences=HapticPreferences(
+                    haptics_enabled=req.haptics_enabled,
+                    reduced_motion=req.reduced_motion,
+                ),
+            )
+        except ValueError as error:
+            raise ApiProblemError(
+                status=422,
+                code=str(error),
+                title="Invalid haptic target or trigger",
+                detail=(
+                    "Haptics are bound to the iPhone rehearsal client; "
+                    "Bee wearable haptic commands are prohibited."
+                ),
+            ) from error
+        return self._serialize_haptic_event(event)

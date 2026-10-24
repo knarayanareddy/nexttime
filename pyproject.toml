@@ -1,12 +1,19 @@
 [project]
 name = "nexttime-domain"
 version = "0.1.0"
-description = "Deterministic NextTime consent, authentic rubric, and skill-state foundation"
+description = "Deterministic NextTime consent, authentic rubric, Bee bridge, minimization, and API services"
 requires-python = ">=3.12,<3.13"
-dependencies = []
+dependencies = [
+  "fastapi==0.162.0",
+  "uvicorn==0.54.0",
+]
+
+[project.scripts]
+nexttime-bee-bridge = "nexttime_bee_bridge.cli:main"
 
 [dependency-groups]
 dev = [
+  "httpx==0.28.1",
   "jsonschema[format]==4.25.1",
   "mypy==1.18.2",
   "pip-audit==2.9.0",
@@ -23,6 +30,10 @@ build-backend = "hatchling.build"
 packages = [
   "packages/domain/nexttime_domain",
   "packages/model-gateway/nexttime_model_gateway",
+  "packages/bee-adapter/nexttime_bee_adapter",
+  "services/minimization/nexttime_minimization",
+  "services/bee-bridge/nexttime_bee_bridge",
+  "services/api/nexttime_api",
 ]
 
 [tool.uv]
@@ -45,4 +56,19 @@ select = ["E", "F", "I", "B", "UP", "S"]
 [tool.mypy]
 python_version = "3.12"
 strict = true
-files = ["packages/domain", "packages/model-gateway"]
+mypy_path = [
+  "packages/domain",
+  "packages/model-gateway",
+  "packages/bee-adapter",
+  "services/minimization",
+  "services/bee-bridge",
+  "services/api",
+]
+files = [
+  "packages/domain",
+  "packages/model-gateway",
+  "packages/bee-adapter",
+  "services/minimization",
+  "services/bee-bridge",
+  "services/api",
+]

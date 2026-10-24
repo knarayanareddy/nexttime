@@ -1,0 +1,2924 @@
+{
+  "components": {
+    "schemas": {
+      "AttemptExcludeRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "delete_now": {
+            "default": false,
+            "title": "Delete Now",
+            "type": "boolean"
+          },
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "reason": {
+            "default": "learner_excluded",
+            "enum": [
+              "learner_excluded",
+              "consent_revoked"
+            ],
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "expected_version"
+        ],
+        "title": "AttemptExcludeRequest",
+        "type": "object"
+      },
+      "AttemptIngestRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "bee_recording_reference": {
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Bee Recording Reference",
+            "type": "string"
+          },
+          "capture_mode": {
+            "enum": [
+              "consented_conversation",
+              "self_memo"
+            ],
+            "title": "Capture Mode",
+            "type": "string"
+          },
+          "consent_id": {
+            "maxLength": 26,
+            "minLength": 26,
+            "title": "Consent Id",
+            "type": "string"
+          },
+          "device_type": {
+            "default": "bee_device",
+            "enum": [
+              "bee_device",
+              "apple_watch_bee"
+            ],
+            "title": "Device Type",
+            "type": "string"
+          },
+          "enrolled_diarization_speaker_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enrolled Diarization Speaker Id"
+          },
+          "learner_goal": {
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Learner Goal",
+            "type": "string"
+          },
+          "learner_id": {
+            "maxLength": 26,
+            "minLength": 26,
+            "title": "Learner Id",
+            "type": "string"
+          },
+          "provenance": {
+            "default": "fixture",
+            "enum": [
+              "live",
+              "fixture"
+            ],
+            "title": "Provenance",
+            "type": "string"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "recurrence_id": {
+            "anyOf": [
+              {
+                "maxLength": 26,
+                "minLength": 26,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recurrence Id"
+          },
+          "segments": {
+            "items": {
+              "$ref": "#/components/schemas/BridgeSegmentPayload"
+            },
+            "maxItems": 200,
+            "minItems": 1,
+            "title": "Segments",
+            "type": "array"
+          },
+          "separation_method": {
+            "anyOf": [
+              {
+                "enum": [
+                  "bee_speaker_labels",
+                  "aws_diarization",
+                  "learner_labeled",
+                  "self_only"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Separation Method"
+          },
+          "situation": {
+            "enum": [
+              "repair_appointment",
+              "school_admin_appointment",
+              "shift_clarification"
+            ],
+            "title": "Situation",
+            "type": "string"
+          }
+        },
+        "required": [
+          "learner_id",
+          "consent_id",
+          "bee_recording_reference",
+          "recorded_at",
+          "capture_mode",
+          "situation",
+          "learner_goal",
+          "segments"
+        ],
+        "title": "AttemptIngestRequest",
+        "type": "object"
+      },
+      "AttemptIngestResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "attempt": {
+            "additionalProperties": true,
+            "title": "Attempt",
+            "type": "object"
+          },
+          "attempt_id": {
+            "title": "Attempt Id",
+            "type": "string"
+          },
+          "learner_review_required": {
+            "title": "Learner Review Required",
+            "type": "boolean"
+          },
+          "status": {
+            "enum": [
+              "ingested",
+              "duplicate"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "attempt_id",
+          "learner_review_required",
+          "attempt"
+        ],
+        "title": "AttemptIngestResponse",
+        "type": "object"
+      },
+      "AttemptListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "AttemptListResponse",
+        "type": "object"
+      },
+      "AttemptReviewRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "assistance_used": {
+            "default": false,
+            "title": "Assistance Used",
+            "type": "boolean"
+          },
+          "breakdown_decisions": {
+            "items": {
+              "$ref": "#/components/schemas/BreakdownDecisionInput"
+            },
+            "title": "Breakdown Decisions",
+            "type": "array"
+          },
+          "confirm_attempt": {
+            "default": true,
+            "title": "Confirm Attempt",
+            "type": "boolean"
+          },
+          "criterion_corrections": {
+            "items": {
+              "$ref": "#/components/schemas/CriterionCorrectionInput"
+            },
+            "title": "Criterion Corrections",
+            "type": "array"
+          },
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "interaction_ended": {
+            "default": true,
+            "title": "Interaction Ended",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "expected_version"
+        ],
+        "title": "AttemptReviewRequest",
+        "type": "object"
+      },
+      "AttemptReviewResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "attempt": {
+            "additionalProperties": true,
+            "title": "Attempt",
+            "type": "object"
+          },
+          "skill_updates": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Skill Updates",
+            "type": "array"
+          }
+        },
+        "required": [
+          "attempt",
+          "skill_updates"
+        ],
+        "title": "AttemptReviewResponse",
+        "type": "object"
+      },
+      "BreakdownDecisionInput": {
+        "additionalProperties": false,
+        "properties": {
+          "breakdown_id": {
+            "maxLength": 26,
+            "minLength": 26,
+            "title": "Breakdown Id",
+            "type": "string"
+          },
+          "decision": {
+            "enum": [
+              "confirmed",
+              "rejected"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "redact_excerpt": {
+            "default": false,
+            "title": "Redact Excerpt",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "breakdown_id",
+          "decision"
+        ],
+        "title": "BreakdownDecisionInput",
+        "type": "object"
+      },
+      "BridgeSegmentPayload": {
+        "additionalProperties": false,
+        "properties": {
+          "asr_confidence": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Asr Confidence",
+            "type": "number"
+          },
+          "end_ms": {
+            "minimum": 1.0,
+            "title": "End Ms",
+            "type": "integer"
+          },
+          "overlapping_speech": {
+            "default": false,
+            "title": "Overlapping Speech",
+            "type": "boolean"
+          },
+          "segment_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Segment Id",
+            "type": "string"
+          },
+          "speaker_confidence": {
+            "default": 1.0,
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Speaker Confidence",
+            "type": "number"
+          },
+          "speaker_label": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Speaker Label"
+          },
+          "start_ms": {
+            "minimum": 0.0,
+            "title": "Start Ms",
+            "type": "integer"
+          },
+          "text": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "segment_id",
+          "text",
+          "start_ms",
+          "end_ms",
+          "asr_confidence"
+        ],
+        "title": "BridgeSegmentPayload",
+        "type": "object"
+      },
+      "CalendarLinkRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "calendar_event_reference": {
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Calendar Event Reference",
+            "type": "string"
+          },
+          "scheduled_for": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scheduled For"
+          }
+        },
+        "required": [
+          "calendar_event_reference"
+        ],
+        "title": "CalendarLinkRequest",
+        "type": "object"
+      },
+      "ConsentCreateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "all_participants_consented": {
+            "title": "All Participants Consented",
+            "type": "boolean"
+          },
+          "attested_at": {
+            "format": "date-time",
+            "title": "Attested At",
+            "type": "string"
+          },
+          "capture_mode": {
+            "enum": [
+              "consented_conversation",
+              "self_memo"
+            ],
+            "title": "Capture Mode",
+            "type": "string"
+          },
+          "consent_id": {
+            "maxLength": 26,
+            "minLength": 26,
+            "title": "Consent Id",
+            "type": "string"
+          },
+          "policy_version": {
+            "default": "consent_v1",
+            "pattern": "^consent_v[0-9]+$",
+            "title": "Policy Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "consent_id",
+          "capture_mode",
+          "all_participants_consented",
+          "attested_at"
+        ],
+        "title": "ConsentCreateRequest",
+        "type": "object"
+      },
+      "ConsentResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "all_participants_consented": {
+            "title": "All Participants Consented",
+            "type": "boolean"
+          },
+          "attested_at": {
+            "title": "Attested At",
+            "type": "string"
+          },
+          "capture_mode": {
+            "title": "Capture Mode",
+            "type": "string"
+          },
+          "consent_id": {
+            "title": "Consent Id",
+            "type": "string"
+          },
+          "learner_id": {
+            "title": "Learner Id",
+            "type": "string"
+          },
+          "policy_version": {
+            "title": "Policy Version",
+            "type": "string"
+          },
+          "revoked": {
+            "title": "Revoked",
+            "type": "boolean"
+          },
+          "revoked_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revoked At"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "consent_id",
+          "learner_id",
+          "capture_mode",
+          "policy_version",
+          "all_participants_consented",
+          "attested_at",
+          "revoked",
+          "revoked_at",
+          "version"
+        ],
+        "title": "ConsentResponse",
+        "type": "object"
+      },
+      "ConsentRevokeResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "consent": {
+            "$ref": "#/components/schemas/ConsentResponse"
+          },
+          "deletion_job": {
+            "$ref": "#/components/schemas/DeletionJobResponse"
+          }
+        },
+        "required": [
+          "consent",
+          "deletion_job"
+        ],
+        "title": "ConsentRevokeResponse",
+        "type": "object"
+      },
+      "CounterpartAudioClip": {
+        "additionalProperties": false,
+        "properties": {
+          "expires_at": {
+            "title": "Expires At",
+            "type": "string"
+          },
+          "signed_url": {
+            "title": "Signed Url",
+            "type": "string"
+          },
+          "turn_id": {
+            "title": "Turn Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "turn_id",
+          "signed_url",
+          "expires_at"
+        ],
+        "title": "CounterpartAudioClip",
+        "type": "object"
+      },
+      "CriterionCorrectionInput": {
+        "additionalProperties": false,
+        "properties": {
+          "criterion_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Criterion Id",
+            "type": "string"
+          },
+          "result": {
+            "enum": [
+              "satisfied",
+              "not_satisfied",
+              "unknown"
+            ],
+            "title": "Result",
+            "type": "string"
+          },
+          "self_evidence_end_ms": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Self Evidence End Ms"
+          },
+          "self_evidence_excerpt": {
+            "maxLength": 500,
+            "title": "Self Evidence Excerpt",
+            "type": "string"
+          },
+          "self_evidence_start_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Self Evidence Start Ms"
+          }
+        },
+        "required": [
+          "criterion_id",
+          "result",
+          "self_evidence_excerpt"
+        ],
+        "title": "CriterionCorrectionInput",
+        "type": "object"
+      },
+      "CriterionDeltaResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "criterion_id": {
+            "title": "Criterion Id",
+            "type": "string"
+          },
+          "delta": {
+            "title": "Delta",
+            "type": "string"
+          },
+          "next_result": {
+            "title": "Next Result",
+            "type": "string"
+          },
+          "next_self_evidence": {
+            "title": "Next Self Evidence",
+            "type": "string"
+          },
+          "prior_result": {
+            "title": "Prior Result",
+            "type": "string"
+          },
+          "prior_self_evidence": {
+            "title": "Prior Self Evidence",
+            "type": "string"
+          }
+        },
+        "required": [
+          "criterion_id",
+          "prior_result",
+          "next_result",
+          "delta",
+          "prior_self_evidence",
+          "next_self_evidence"
+        ],
+        "title": "CriterionDeltaResponse",
+        "type": "object"
+      },
+      "DeletionJobResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "alarm_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Alarm Codes",
+            "type": "array"
+          },
+          "alarm_triggered": {
+            "title": "Alarm Triggered",
+            "type": "boolean"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "consent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Consent Id"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "job_id": {
+            "title": "Job Id",
+            "type": "string"
+          },
+          "learner_id": {
+            "title": "Learner Id",
+            "type": "string"
+          },
+          "scope": {
+            "title": "Scope",
+            "type": "string"
+          },
+          "stage_receipts": {
+            "items": {
+              "$ref": "#/components/schemas/StageReceiptResponse"
+            },
+            "title": "Stage Receipts",
+            "type": "array"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "target_attempt_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Target Attempt Ids",
+            "type": "array"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "job_id",
+          "learner_id",
+          "scope",
+          "target_attempt_ids",
+          "consent_id",
+          "status",
+          "stage_receipts",
+          "alarm_triggered",
+          "alarm_codes",
+          "created_at",
+          "updated_at",
+          "completed_at"
+        ],
+        "title": "DeletionJobResponse",
+        "type": "object"
+      },
+      "ExportResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "attempts": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Attempts",
+            "type": "array"
+          },
+          "comparisons": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Comparisons",
+            "type": "array"
+          },
+          "consents": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Consents",
+            "type": "array"
+          },
+          "exported_at": {
+            "title": "Exported At",
+            "type": "string"
+          },
+          "learner_id": {
+            "title": "Learner Id",
+            "type": "string"
+          },
+          "other_speaker_transcript_included": {
+            "const": false,
+            "title": "Other Speaker Transcript Included",
+            "type": "boolean"
+          },
+          "recurrences": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Recurrences",
+            "type": "array"
+          },
+          "rehearsal_history": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Rehearsal History",
+            "type": "array"
+          },
+          "schema_version": {
+            "const": 1,
+            "title": "Schema Version",
+            "type": "integer"
+          },
+          "skill_states": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Skill States",
+            "type": "object"
+          }
+        },
+        "required": [
+          "schema_version",
+          "learner_id",
+          "exported_at",
+          "consents",
+          "attempts",
+          "recurrences",
+          "rehearsal_history",
+          "comparisons",
+          "skill_states",
+          "other_speaker_transcript_included"
+        ],
+        "title": "ExportResponse",
+        "type": "object"
+      },
+      "FunctionalWinResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "criterion_id": {
+            "title": "Criterion Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "next_attempt_id": {
+            "title": "Next Attempt Id",
+            "type": "string"
+          },
+          "prior_attempt_id": {
+            "title": "Prior Attempt Id",
+            "type": "string"
+          },
+          "self_evidence_excerpt": {
+            "title": "Self Evidence Excerpt",
+            "type": "string"
+          }
+        },
+        "required": [
+          "prior_attempt_id",
+          "next_attempt_id",
+          "criterion_id",
+          "kind",
+          "self_evidence_excerpt"
+        ],
+        "title": "FunctionalWinResponse",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HealthResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "service": {
+            "title": "Service",
+            "type": "string"
+          },
+          "status": {
+            "const": "ok",
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "service",
+          "version"
+        ],
+        "title": "HealthResponse",
+        "type": "object"
+      },
+      "OutcomeComparisonResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "causal_claim": {
+            "const": false,
+            "title": "Causal Claim",
+            "type": "boolean"
+          },
+          "comparison_confidence": {
+            "title": "Comparison Confidence",
+            "type": "string"
+          },
+          "criterion_deltas": {
+            "items": {
+              "$ref": "#/components/schemas/CriterionDeltaResponse"
+            },
+            "title": "Criterion Deltas",
+            "type": "array"
+          },
+          "functional_progress": {
+            "title": "Functional Progress",
+            "type": "string"
+          },
+          "learner_id": {
+            "title": "Learner Id",
+            "type": "string"
+          },
+          "next_attempt_id": {
+            "title": "Next Attempt Id",
+            "type": "string"
+          },
+          "prior_attempt_id": {
+            "title": "Prior Attempt Id",
+            "type": "string"
+          },
+          "recurrence_id": {
+            "title": "Recurrence Id",
+            "type": "string"
+          },
+          "rubric_version": {
+            "title": "Rubric Version",
+            "type": "string"
+          },
+          "situation": {
+            "title": "Situation",
+            "type": "string"
+          },
+          "uncertainty_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Uncertainty Codes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "prior_attempt_id",
+          "next_attempt_id",
+          "learner_id",
+          "recurrence_id",
+          "situation",
+          "rubric_version",
+          "criterion_deltas",
+          "functional_progress",
+          "comparison_confidence",
+          "uncertainty_codes",
+          "causal_claim"
+        ],
+        "title": "OutcomeComparisonResponse",
+        "type": "object"
+      },
+      "ProgressHistoryResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "authentic_attempts": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Authentic Attempts",
+            "type": "array"
+          },
+          "causal_claim": {
+            "const": false,
+            "title": "Causal Claim",
+            "type": "boolean"
+          },
+          "comparisons": {
+            "items": {
+              "$ref": "#/components/schemas/OutcomeComparisonResponse"
+            },
+            "title": "Comparisons",
+            "type": "array"
+          },
+          "functional_wins": {
+            "items": {
+              "$ref": "#/components/schemas/FunctionalWinResponse"
+            },
+            "title": "Functional Wins",
+            "type": "array"
+          },
+          "gamified_streaks": {
+            "const": false,
+            "title": "Gamified Streaks",
+            "type": "boolean"
+          },
+          "learner_id": {
+            "title": "Learner Id",
+            "type": "string"
+          },
+          "rehearsal_history": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Rehearsal History",
+            "type": "array"
+          },
+          "skill_states": {
+            "items": {
+              "$ref": "#/components/schemas/SkillStateResponse"
+            },
+            "title": "Skill States",
+            "type": "array"
+          }
+        },
+        "required": [
+          "learner_id",
+          "authentic_attempts",
+          "comparisons",
+          "functional_wins",
+          "skill_states",
+          "rehearsal_history",
+          "causal_claim",
+          "gamified_streaks"
+        ],
+        "title": "ProgressHistoryResponse",
+        "type": "object"
+      },
+      "RecurrenceCreateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "attempt_id": {
+            "maxLength": 26,
+            "minLength": 26,
+            "title": "Attempt Id",
+            "type": "string"
+          },
+          "learner_confirmed": {
+            "default": true,
+            "title": "Learner Confirmed",
+            "type": "boolean"
+          },
+          "notification_behavior": {
+            "default": "local_notification",
+            "enum": [
+              "local_notification",
+              "open_template_only"
+            ],
+            "title": "Notification Behavior",
+            "type": "string"
+          },
+          "rehearsal_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rehearsal At"
+          },
+          "scheduled_for": {
+            "format": "date-time",
+            "title": "Scheduled For",
+            "type": "string"
+          },
+          "time_zone": {
+            "default": "Europe/Amsterdam",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Time Zone",
+            "type": "string"
+          }
+        },
+        "required": [
+          "attempt_id",
+          "scheduled_for"
+        ],
+        "title": "RecurrenceCreateRequest",
+        "type": "object"
+      },
+      "RecurrenceResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "attempt_id": {
+            "title": "Attempt Id",
+            "type": "string"
+          },
+          "calendar_event_reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calendar Event Reference"
+          },
+          "learner_id": {
+            "title": "Learner Id",
+            "type": "string"
+          },
+          "notification_behavior": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notification Behavior"
+          },
+          "quiet_hours": {
+            "title": "Quiet Hours",
+            "type": "boolean"
+          },
+          "recurrence_id": {
+            "title": "Recurrence Id",
+            "type": "string"
+          },
+          "rehearsal_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rehearsal At"
+          },
+          "scheduled_for": {
+            "title": "Scheduled For",
+            "type": "string"
+          },
+          "selection_required": {
+            "title": "Selection Required",
+            "type": "boolean"
+          },
+          "situation": {
+            "title": "Situation",
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "learner_marked",
+              "explicit_calendar_link"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "time_zone": {
+            "title": "Time Zone",
+            "type": "string"
+          }
+        },
+        "required": [
+          "recurrence_id",
+          "learner_id",
+          "attempt_id",
+          "situation",
+          "scheduled_for",
+          "rehearsal_at",
+          "time_zone",
+          "source",
+          "calendar_event_reference",
+          "quiet_hours",
+          "selection_required",
+          "notification_behavior"
+        ],
+        "title": "RecurrenceResponse",
+        "type": "object"
+      },
+      "RehearsalCompleteRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "exit_early": {
+            "default": false,
+            "title": "Exit Early",
+            "type": "boolean"
+          },
+          "final_turn_sequence": {
+            "minimum": 0.0,
+            "title": "Final Turn Sequence",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "final_turn_sequence"
+        ],
+        "title": "RehearsalCompleteRequest",
+        "type": "object"
+      },
+      "RehearsalCreateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "breakdown_id": {
+            "maxLength": 26,
+            "minLength": 26,
+            "title": "Breakdown Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "breakdown_id"
+        ],
+        "title": "RehearsalCreateRequest",
+        "type": "object"
+      },
+      "RehearsalSessionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "attempt_id": {
+            "title": "Attempt Id",
+            "type": "string"
+          },
+          "committed_turn_count": {
+            "title": "Committed Turn Count",
+            "type": "integer"
+          },
+          "counterpart_persona": {
+            "title": "Counterpart Persona",
+            "type": "string"
+          },
+          "current_turn_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Turn Id"
+          },
+          "estimated_seconds": {
+            "title": "Estimated Seconds",
+            "type": "integer"
+          },
+          "learner_id": {
+            "title": "Learner Id",
+            "type": "string"
+          },
+          "model_generated": {
+            "title": "Model Generated",
+            "type": "boolean"
+          },
+          "non_speaking_practice": {
+            "title": "Non Speaking Practice",
+            "type": "boolean"
+          },
+          "recurrence_id": {
+            "title": "Recurrence Id",
+            "type": "string"
+          },
+          "rehearsal_id": {
+            "title": "Rehearsal Id",
+            "type": "string"
+          },
+          "safety_exclusions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Safety Exclusions",
+            "type": "array"
+          },
+          "situation": {
+            "title": "Situation",
+            "type": "string"
+          },
+          "speaking_rate": {
+            "title": "Speaking Rate",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "support_phrases": {
+            "items": {
+              "$ref": "#/components/schemas/SupportPhraseResponse"
+            },
+            "title": "Support Phrases",
+            "type": "array"
+          },
+          "target_function": {
+            "title": "Target Function",
+            "type": "string"
+          },
+          "template_version": {
+            "title": "Template Version",
+            "type": "string"
+          },
+          "turns": {
+            "items": {
+              "$ref": "#/components/schemas/ScenarioTurnResponse"
+            },
+            "title": "Turns",
+            "type": "array"
+          },
+          "voice_id": {
+            "title": "Voice Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rehearsal_id",
+          "recurrence_id",
+          "attempt_id",
+          "learner_id",
+          "situation",
+          "target_function",
+          "estimated_seconds",
+          "state",
+          "current_turn_id",
+          "committed_turn_count",
+          "non_speaking_practice",
+          "template_version",
+          "model_generated",
+          "counterpart_persona",
+          "voice_id",
+          "speaking_rate",
+          "turns",
+          "support_phrases",
+          "safety_exclusions"
+        ],
+        "title": "RehearsalSessionResponse",
+        "type": "object"
+      },
+      "RehearsalTurnSubmitRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "confidence": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "mode": {
+            "default": "speech",
+            "enum": [
+              "speech",
+              "text",
+              "tap"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "phrase_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phrase Id"
+          },
+          "save_self_excerpt": {
+            "default": false,
+            "title": "Save Self Excerpt",
+            "type": "boolean"
+          },
+          "sequence": {
+            "minimum": 1.0,
+            "title": "Sequence",
+            "type": "integer"
+          },
+          "transcript": {
+            "default": "",
+            "maxLength": 500,
+            "title": "Transcript",
+            "type": "string"
+          },
+          "turn_event_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Turn Event Id",
+            "type": "string"
+          },
+          "turn_id": {
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Turn Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "turn_event_id",
+          "turn_id",
+          "sequence",
+          "confidence"
+        ],
+        "title": "RehearsalTurnSubmitRequest",
+        "type": "object"
+      },
+      "RehearsalTurnSubmitResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "authentic_mastery_updated": {
+            "const": false,
+            "title": "Authentic Mastery Updated",
+            "type": "boolean"
+          },
+          "committed_turn_count": {
+            "title": "Committed Turn Count",
+            "type": "integer"
+          },
+          "current_turn_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Turn Id"
+          },
+          "duplicate": {
+            "title": "Duplicate",
+            "type": "boolean"
+          },
+          "mapped_function": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mapped Function"
+          },
+          "non_speaking_practice": {
+            "title": "Non Speaking Practice",
+            "type": "boolean"
+          },
+          "raw_audio_deleted": {
+            "title": "Raw Audio Deleted",
+            "type": "boolean"
+          },
+          "rehearsal_id": {
+            "title": "Rehearsal Id",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "support": {
+            "anyOf": [
+              {
+                "enum": [
+                  "repair",
+                  "easier_alternative"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Support"
+          },
+          "transcript_delete_after": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transcript Delete After"
+          }
+        },
+        "required": [
+          "rehearsal_id",
+          "state",
+          "current_turn_id",
+          "mapped_function",
+          "support",
+          "committed_turn_count",
+          "non_speaking_practice",
+          "duplicate",
+          "raw_audio_deleted",
+          "transcript_delete_after",
+          "authentic_mastery_updated"
+        ],
+        "title": "RehearsalTurnSubmitResponse",
+        "type": "object"
+      },
+      "ScenarioTurnResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "accepted_phrase_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Accepted Phrase Ids",
+            "type": "array"
+          },
+          "counterpart_audio": {
+            "$ref": "#/components/schemas/CounterpartAudioClip"
+          },
+          "counterpart_text_en": {
+            "title": "Counterpart Text En",
+            "type": "string"
+          },
+          "counterpart_text_nl": {
+            "title": "Counterpart Text Nl",
+            "type": "string"
+          },
+          "expected_functions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Expected Functions",
+            "type": "array"
+          },
+          "repair_if_missing": {
+            "title": "Repair If Missing",
+            "type": "string"
+          },
+          "turn_id": {
+            "title": "Turn Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "turn_id",
+          "counterpart_text_nl",
+          "counterpart_text_en",
+          "expected_functions",
+          "accepted_phrase_ids",
+          "repair_if_missing",
+          "counterpart_audio"
+        ],
+        "title": "ScenarioTurnResponse",
+        "type": "object"
+      },
+      "SkillStateResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "alpha": {
+            "title": "Alpha",
+            "type": "number"
+          },
+          "authentic_attempt_count": {
+            "title": "Authentic Attempt Count",
+            "type": "integer"
+          },
+          "beta": {
+            "title": "Beta",
+            "type": "number"
+          },
+          "mastery": {
+            "title": "Mastery",
+            "type": "number"
+          },
+          "skill_code": {
+            "title": "Skill Code",
+            "type": "string"
+          },
+          "uncertainty": {
+            "title": "Uncertainty",
+            "type": "number"
+          }
+        },
+        "required": [
+          "skill_code",
+          "alpha",
+          "beta",
+          "mastery",
+          "uncertainty",
+          "authentic_attempt_count"
+        ],
+        "title": "SkillStateResponse",
+        "type": "object"
+      },
+      "StageReceiptResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "completed_at": {
+            "title": "Completed At",
+            "type": "string"
+          },
+          "deleted_count": {
+            "title": "Deleted Count",
+            "type": "integer"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "receipt_id": {
+            "title": "Receipt Id",
+            "type": "string"
+          },
+          "stage": {
+            "title": "Stage",
+            "type": "string"
+          },
+          "verified_empty": {
+            "title": "Verified Empty",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "stage",
+          "deleted_count",
+          "verified_empty",
+          "completed_at",
+          "receipt_id",
+          "error_code"
+        ],
+        "title": "StageReceiptResponse",
+        "type": "object"
+      },
+      "SupportPhraseResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "phrase_id": {
+            "title": "Phrase Id",
+            "type": "string"
+          },
+          "text_en": {
+            "title": "Text En",
+            "type": "string"
+          },
+          "text_nl": {
+            "title": "Text Nl",
+            "type": "string"
+          }
+        },
+        "required": [
+          "phrase_id",
+          "text_nl",
+          "text_en"
+        ],
+        "title": "SupportPhraseResponse",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Consented real-world language-attempt review, bounded 90-second Dutch rehearsal sessions, and non-gamified authentic learner progress history.",
+    "title": "NextTime API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/healthz": {
+      "get": {
+        "operationId": "healthz_healthz_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Healthz",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/v1/account": {
+      "delete": {
+        "operationId": "delete_account_v1_account_delete",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeletionJobResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Account",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/v1/attempts": {
+      "get": {
+        "operationId": "list_attempts_v1_attempts_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttemptListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Attempts",
+        "tags": [
+          "attempts"
+        ]
+      }
+    },
+    "/v1/attempts/ingest": {
+      "post": {
+        "operationId": "ingest_attempt_v1_attempts_ingest_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttemptIngestRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttemptIngestResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ingest Attempt",
+        "tags": [
+          "attempts"
+        ]
+      }
+    },
+    "/v1/attempts/{attempt_id}": {
+      "get": {
+        "operationId": "get_attempt_v1_attempts__attempt_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "attempt_id",
+            "required": true,
+            "schema": {
+              "title": "Attempt Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Attempt V1 Attempts  Attempt Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Attempt",
+        "tags": [
+          "attempts"
+        ]
+      }
+    },
+    "/v1/attempts/{attempt_id}/exclude": {
+      "post": {
+        "operationId": "exclude_attempt_v1_attempts__attempt_id__exclude_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "attempt_id",
+            "required": true,
+            "schema": {
+              "title": "Attempt Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttemptExcludeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttemptReviewResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Exclude Attempt",
+        "tags": [
+          "attempts"
+        ]
+      }
+    },
+    "/v1/attempts/{attempt_id}/review": {
+      "post": {
+        "operationId": "review_attempt_v1_attempts__attempt_id__review_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "attempt_id",
+            "required": true,
+            "schema": {
+              "title": "Attempt Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Match",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "If-Match"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttemptReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttemptReviewResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Review Attempt",
+        "tags": [
+          "attempts"
+        ]
+      }
+    },
+    "/v1/consents": {
+      "post": {
+        "operationId": "create_consent_v1_consents_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Consent",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/v1/consents/{consent_id}/revoke": {
+      "post": {
+        "operationId": "revoke_consent_v1_consents__consent_id__revoke_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "consent_id",
+            "required": true,
+            "schema": {
+              "title": "Consent Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentRevokeResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Revoke Consent",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/v1/export": {
+      "get": {
+        "operationId": "export_data_v1_export_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Export Data",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/v1/progress": {
+      "get": {
+        "operationId": "get_progress_v1_progress_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgressHistoryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Progress",
+        "tags": [
+          "progress"
+        ]
+      }
+    },
+    "/v1/recurrences": {
+      "post": {
+        "operationId": "create_recurrence_v1_recurrences_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecurrenceCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecurrenceResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Recurrence",
+        "tags": [
+          "rehearsals"
+        ]
+      }
+    },
+    "/v1/recurrences/{recurrence_id}/calendar-link": {
+      "post": {
+        "operationId": "link_calendar_event_v1_recurrences__recurrence_id__calendar_link_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "recurrence_id",
+            "required": true,
+            "schema": {
+              "title": "Recurrence Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalendarLinkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecurrenceResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Link Calendar Event",
+        "tags": [
+          "rehearsals"
+        ]
+      }
+    },
+    "/v1/recurrences/{recurrence_id}/rehearsal": {
+      "post": {
+        "operationId": "create_rehearsal_v1_recurrences__recurrence_id__rehearsal_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "recurrence_id",
+            "required": true,
+            "schema": {
+              "title": "Recurrence Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RehearsalCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RehearsalSessionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Rehearsal",
+        "tags": [
+          "rehearsals"
+        ]
+      }
+    },
+    "/v1/rehearsals/{rehearsal_id}": {
+      "get": {
+        "operationId": "get_rehearsal_v1_rehearsals__rehearsal_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rehearsal_id",
+            "required": true,
+            "schema": {
+              "title": "Rehearsal Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RehearsalSessionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Rehearsal",
+        "tags": [
+          "rehearsals"
+        ]
+      }
+    },
+    "/v1/rehearsals/{rehearsal_id}/complete": {
+      "post": {
+        "operationId": "complete_rehearsal_v1_rehearsals__rehearsal_id__complete_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rehearsal_id",
+            "required": true,
+            "schema": {
+              "title": "Rehearsal Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RehearsalCompleteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RehearsalSessionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Complete Rehearsal",
+        "tags": [
+          "rehearsals"
+        ]
+      }
+    },
+    "/v1/rehearsals/{rehearsal_id}/turns": {
+      "post": {
+        "operationId": "submit_rehearsal_turn_v1_rehearsals__rehearsal_id__turns_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rehearsal_id",
+            "required": true,
+            "schema": {
+              "title": "Rehearsal Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RehearsalTurnSubmitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RehearsalTurnSubmitResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Submit Rehearsal Turn",
+        "tags": [
+          "rehearsals"
+        ]
+      }
+    }
+  }
+}

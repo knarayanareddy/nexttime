@@ -3,28 +3,32 @@
 ## Locked local toolchain
 
 - Python `>=3.12,<3.13`; validated with CPython 3.12.12.
-- uv 0.9.5 and `uv.lock`; Hatchling 1.27.0 builds the source distribution/wheel.
-- Ruff 0.13.2, mypy 1.18.2, pytest 9.0.3, pytest-cov 6.3.0.
-- jsonschema 4.25.1 with format support and pip-audit 2.9.0.
-- No third-party production runtime dependency for the current domain package.
+- `uv` (`uv.lock`); Hatchling `1.27.0` builds the source distribution and wheel.
+- Runtime dependencies (`services/api` HTTP boundary only; `packages/domain` remains pure stdlib):
+  - `fastapi==0.162.0` (transitively `pydantic==2.14.1`, `starlette==1.9.0`)
+  - `uvicorn==0.54.0`
+- Development/audit dependencies:
+  - `httpx==0.28.1`
+  - `jsonschema[format]==4.25.1`
+  - `mypy==1.18.2`
+  - `pip-audit==2.9.0`
+  - `pytest==9.0.3`
+  - `pytest-cov==6.3.0`
+  - `ruff==0.13.2`
 
-`make bootstrap` uses `uv sync --frozen`. Build-system and development dependencies are resolved in the lockfile; sibling projects have separate environments and locks.
+`make bootstrap` uses `uv sync --frozen`. Contract tests (`tests/contract/test_openapi_contract.py`) enforce via AST inspection that `packages/domain/nexttime_domain` imports zero web, HTTP, ORM, or cloud libraries.
 
 ## Security audit
-
-The first SSL-capable audit found `PYSEC-2026-1845` in pytest 8.4.2. Both Python foundations updated to pytest 9.0.3, regenerated their locks, and reran all tests. The final NextTime audit reported no known vulnerabilities on 2026-10-23.
-
-Normal command:
 
 ```bash
 make test-security
 # equivalent audit portion: uv run pip-audit --skip-editable
 ```
 
-Because the recorded source-built 3.12 interpreter lacks SSL, the final audit used pip-audit 2.9.0 under SSL-capable system Python 3.11.2 with `--path` targeting NextTime's Python 3.12 `site-packages`. `--skip-editable` excludes only the local `nexttime-domain` source distribution, not third-party packages. Project tests still ran under 3.12.12.
+`uv run pip-audit --skip-editable` ran directly under SSL-capable CPython 3.12.12 on 2026-10-24 and reported zero known vulnerabilities across all 69 locked packages. `--skip-editable` excludes only the local workspace distribution (`nexttime-domain`), not third-party packages.
 
 Advisory results are point-in-time and do not replace license, secrets, infrastructure, or production privacy/security reviews.
 
 ## External dependencies still blocked
 
-Bee CLI/MCP and hardware, iOS/Swift, AWS services, persistence, notification, and audio/speech SDKs are not installed or simulated. They require separate version/access preflight and lockfile changes when implemented.
+Official Bee CLI/MCP binaries and physical Bee/Apple Watch hardware, iOS/Swift client tooling, AWS SDKs (`boto3` for Bedrock/Polly/Transcribe/S3/KMS), and PostgreSQL persistence drivers are not installed or simulated as live providers. They require separate version/access preflight and lockfile updates when integrated.

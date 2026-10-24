@@ -10,7 +10,6 @@ build
 **/__pycache__
 apps/web/node_modules
 apps/web/dist
-docs/media/*.webm
 .env
 .env.local
 .env.*.local

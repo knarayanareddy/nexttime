@@ -538,6 +538,105 @@ textarea {
   font-size: 13px;
 }
 
+.nt-view-switcher {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 5px;
+  background: var(--nt-surface);
+  border: 1px solid var(--nt-border);
+  border-radius: 12px;
+}
+
+.nt-view-switch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--nt-text-muted);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background var(--nt-transition), color var(--nt-transition),
+    border-color var(--nt-transition);
+}
+
+.nt-view-switch-btn:hover {
+  color: var(--nt-text);
+  background: var(--nt-canvas);
+}
+
+.nt-view-switch-btn--active {
+  background: var(--nt-primary);
+  color: var(--nt-on-primary);
+  border-color: var(--nt-primary);
+}
+
+.nt-view-switch-btn--active:hover {
+  background: var(--nt-primary-hover);
+  color: var(--nt-on-primary);
+}
+
+.nt-video-stage {
+  margin-top: 14px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #1a2623;
+  border: 1px solid var(--nt-border);
+  box-shadow: 0 12px 32px rgba(35, 51, 47, 0.12);
+}
+
+.nt-walkthrough-video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  background: #1a2623;
+}
+
+.nt-chapter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+@media (max-width: 900px) {
+  .nt-chapter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .nt-chapter-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.nt-chapter-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  text-align: left;
+  padding: 12px 13px;
+  border-radius: var(--nt-radius-sm);
+  border: 1px solid var(--nt-border);
+  background: var(--nt-canvas);
+  color: var(--nt-text);
+  cursor: pointer;
+  transition: border-color var(--nt-transition), background var(--nt-transition);
+}
+
+.nt-chapter-btn:hover {
+  border-color: var(--nt-primary);
+  background: var(--nt-surface-alt);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

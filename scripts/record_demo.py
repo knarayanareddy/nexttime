@@ -371,9 +371,9 @@ def run_guided_walkthrough(page: Page, target_url: str) -> None:
         "(txt) => window.__ntSetCaption && window.__ntSetCaption(txt)",
         "4/4 · Breakdown Analysis: Rubric Satisfied · 0B Raw PCM · Authentic Mastery Untouched",
     )
-    page.wait_for_timeout(7000)
+    page.wait_for_timeout(8000)
     page.get_by_test_id("privacy-ledger-list").scroll_into_view_if_needed()
-    page.wait_for_timeout(7000)
+    page.wait_for_timeout(12000)
 
 
 def record_demo_video(config: RecorderConfig) -> Path:
@@ -469,7 +469,6 @@ def record_demo_video(config: RecorderConfig) -> Path:
                             "libopus",
                             "-b:a",
                             "128k",
-                            "-shortest",
                             str(config.output_path),
                         ],
                         check=True,

@@ -8,14 +8,22 @@
   - `fastapi==0.162.0` (transitively `pydantic==2.14.1`, `starlette==1.9.0`)
   - `uvicorn==0.54.0`
   - `websockets==15.0.1` (ASGI WebSocket protocol support for `/v1/rehearsal/ws`)
-- Development/audit dependencies:
+- Development/audit/recording dependencies:
   - `httpx==0.28.1`
+  - `imageio-ffmpeg==0.6.0`
   - `jsonschema[format]==4.25.1`
   - `mypy==1.18.2`
   - `pip-audit==2.9.0`
+  - `playwright==1.64.1`
   - `pytest==9.0.3`
   - `pytest-cov==6.3.0`
+  - `pyyaml==6.0.3`
   - `ruff==0.13.2`
+  - `types-jsonschema==4.26.0.20261006`
+  - `types-pyyaml==6.0.12.20260906`
+- Frontend workspace (`apps/web/package.json` + `apps/web/pnpm-lock.yaml`, Node.js 22.x + `pnpm@10.12.4`):
+  - `react==18.3.1`, `react-dom==18.3.1`
+  - `typescript==5.8.3`, `vite==6.3.5`, `@vitejs/plugin-react==4.5.2`
 
 `make bootstrap` uses `uv sync --frozen`. Contract tests (`tests/contract/test_openapi_contract.py`) enforce via AST inspection that `packages/domain/nexttime_domain` imports zero web, HTTP, ORM, or cloud libraries.
 

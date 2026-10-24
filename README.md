@@ -14,7 +14,10 @@ Requirements: Python 3.12 (`>=3.12,<3.13`), `uv`, and `make`. Dependencies are p
 make setup                 # uv sync --frozen and safe .env.local
 make dev                   # deterministic domain + rehearsal walking skeleton
 make dev-api               # run FastAPI /v1 server (REST + /v1/rehearsal/ws) on 0.0.0.0:8000
+pnpm --dir apps/web dev    # run interactive web rehearsal player on 0.0.0.0:3000 (/nexttime/)
+docker compose up --build  # single-command Redis (6379) + FastAPI (8000) + Web UI (3000)
 uv run python scripts/simulate_rehearsal.py   # interactive Dutch rehearsal CLI simulator
+uv run python scripts/record_demo.py          # record guided demo video -> docs/media/nexttime-demo.webm
 make lint typecheck        # ruff check + format check + strict mypy across all packages/services
 make test-unit             # >=90% branch coverage across domain, adapters, workers, and API
 make test-contract         # JSON Schema, OpenAPI 3.1 zero-drift, and stdlib boundary checks
@@ -37,8 +40,11 @@ Native iOS, live Bee hardware, PostgreSQL/S3 integration, CDK infrastructure, E2
 | [`services/rehearsal/nexttime_rehearsal/`](./services/rehearsal/nexttime_rehearsal/) | Bounded push-to-talk Dutch audio chunk transcriber with AWS `vnd.amazon.eventstream` CRC32 codec, streaming consent gate, covert-mic rejection, and immediate in-place PCM zeroing |
 | [`services/bee-bridge/nexttime_bee_bridge/`](./services/bee-bridge/nexttime_bee_bridge/) | Local consented Bee transcript ingestion listener (`nexttime-bee-bridge` CLI + lease cursor) |
 | [`services/minimization/nexttime_minimization/`](./services/minimization/nexttime_minimization/) | `InMemoryArtifactStore` and 4-stage `DeletionPipelineWorker` (revocation, TTL sweeps, overdue alarms, tombstones) |
-| [`services/api/nexttime_api/`](./services/api/nexttime_api/) | FastAPI `/v1` backend + `/v1/rehearsal/ws` bidirectional WebSocket for consents, ingestion, attempt review, calendar candidate sync & confirmation, recurrence/rehearsal sessions, PTT chunk transcription, rehearsal haptics, learner progress history, export, and account deletion |
+| [`services/api/nexttime_api/`](./services/api/nexttime_api/) | FastAPI `/v1` backend (`/v1/health`, REST, and `/v1/rehearsal/ws` bidirectional WebSocket) for consents, ingestion, attempt review, calendar candidate sync & confirmation, recurrence/rehearsal sessions, PTT chunk transcription, rehearsal haptics, learner progress history, export, and account deletion |
+| [`apps/web/`](./apps/web/) | React 18 + Vite + TypeScript 5 interactive Dutch rehearsal player (`base: '/nexttime/'`) supporting both standalone GitHub Pages sandbox mode (`examples/real-world-attempt.example.json`) and live `/v1/rehearsal/ws` streaming |
+| [`docker-compose.yml`](./docker-compose.yml) | Single-command local orchestration running ephemeral Redis (`6379`), FastAPI (`8000` with `/v1/health` check), and Nginx-proxied Web UI (`3000`) |
 | [`scripts/simulate_rehearsal.py`](./scripts/simulate_rehearsal.py) | Interactive terminal Dutch rehearsal simulator supporting `.wav`/`.pcm` audio upload, typed/tapped phrases, console haptic pulses, and post-rehearsal breakdown summaries without Xcode/SwiftUI |
+| [`scripts/record_demo.py`](./scripts/record_demo.py) | Playwright (Python) guided video recorder generating [`docs/media/nexttime-demo.webm`](./docs/media/nexttime-demo.webm) |
 | [`packages/contracts/`](./packages/contracts/) | Attempt schema copy, model-gateway schemas, and drift-checked `openapi.v1.json` |
 | [`packages/rubrics/`](./packages/rubrics/) | Draft educator-review-required situation rubrics |
 | [`tests/`](./tests/) | Unit, contract, and security/privacy test suites |

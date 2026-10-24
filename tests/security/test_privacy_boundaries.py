@@ -11,11 +11,12 @@ from nexttime_domain import (
     Rubric,
     SelfExcerpt,
     SensitiveContentError,
+    Situation,
     ensure_non_sensitive_excerpts,
     validate_minimized_attempt,
     validate_raw_extraction,
 )
-from nexttime_domain.transcripts import CaptureMode, MinimizedTranscript, Situation
+from nexttime_domain.transcripts import CaptureMode, MinimizedTranscript
 
 
 def test_confirmed_records_must_be_minimized_and_confirmed(

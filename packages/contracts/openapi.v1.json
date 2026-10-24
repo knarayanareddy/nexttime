@@ -3389,6 +3389,27 @@
         ]
       }
     },
+    "/v1/health": {
+      "get": {
+        "operationId": "v1_health_v1_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "V1 Health",
+        "tags": [
+          "system"
+        ]
+      }
+    },
     "/v1/progress": {
       "get": {
         "operationId": "get_progress_v1_progress_get",

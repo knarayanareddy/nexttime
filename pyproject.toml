@@ -15,12 +15,17 @@ nexttime-bee-bridge = "nexttime_bee_bridge.cli:main"
 [dependency-groups]
 dev = [
   "httpx==0.28.1",
+  "imageio-ffmpeg>=0.6.0",
   "jsonschema[format]==4.25.1",
   "mypy==1.18.2",
   "pip-audit==2.9.0",
+  "playwright>=1.64.1",
   "pytest==9.0.3",
   "pytest-cov==6.3.0",
+  "pyyaml>=6.0.3",
   "ruff==0.13.2",
+  "types-jsonschema>=4.26.0.20261006",
+  "types-pyyaml>=6.0.12.20260906",
 ]
 
 [build-system]
@@ -60,6 +65,12 @@ select = ["E", "F", "I", "B", "UP", "S"]
 [tool.mypy]
 python_version = "3.12"
 strict = true
+explicit_package_bases = true
+exclude = [
+  "^apps/web/",
+  "^dist/",
+  "^build/",
+]
 mypy_path = [
   "packages/domain",
   "packages/model-gateway",
@@ -69,6 +80,7 @@ mypy_path = [
   "services/minimization",
   "services/bee-bridge",
   "services/api",
+  "tests",
 ]
 files = [
   "packages/domain",
@@ -80,3 +92,16 @@ files = [
   "services/bee-bridge",
   "services/api",
 ]
+
+[[tool.mypy.overrides]]
+module = ["tests.*", "unit.*", "contract.*", "security.*", "conftest"]
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+disallow_untyped_decorators = false
+warn_return_any = false
+warn_unused_ignores = false
+disable_error_code = ["index", "attr-defined", "no-any-return", "unused-ignore"]
+
+[[tool.mypy.overrides]]
+module = ["imageio_ffmpeg", "imageio_ffmpeg.*"]
+ignore_missing_imports = true

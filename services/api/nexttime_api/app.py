@@ -102,6 +102,10 @@ def create_app(state: ApiRuntimeState | None = None) -> FastAPI:
     def healthz() -> dict[str, str]:
         return {"status": "ok", "service": "nexttime-api", "version": "0.1.0"}
 
+    @app.get("/v1/health", response_model=HealthResponse, tags=["system"])
+    def v1_health() -> dict[str, str]:
+        return {"status": "ok", "service": "nexttime-api", "version": "0.1.0"}
+
     @app.post(
         "/v1/consents",
         response_model=ConsentResponse,

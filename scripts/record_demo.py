@@ -140,8 +140,10 @@ def wait_for_http_ready(url: str, timeout_sec: float = 15.0) -> None:
     raise RuntimeError(f"Timed out waiting for local server at {url}")
 
 
-def ensure_playwright_ffmpeg_ready() -> Path:
+def ensure_playwright_ffmpeg_ready() -> Path | None:
     """Ensure Playwright's internal video recorder finds a working Linux ffmpeg binary."""
+    if sys.platform == "darwin":
+        return None
     _node_bin, cli_js = pw_driver.compute_driver_executable()
     browsers_manifest = json.loads(
         (Path(cli_js).parent / "browsers.json").read_text(encoding="utf-8")
@@ -168,6 +170,8 @@ def ensure_playwright_ffmpeg_ready() -> Path:
 
 def ensure_portable_chromium_binary() -> tuple[Path | None, list[str]]:
     """Return an explicit Chromium path + flags when standard Playwright Chromium is absent."""
+    if sys.platform == "darwin":
+        return None, []
     cached_bin = Path("/tmp/chromium")  # noqa: S108
     cached_libs = Path("/tmp/al2023/lib")  # noqa: S108
     if cached_bin.is_file() and cached_libs.is_dir():
@@ -308,20 +312,20 @@ def run_guided_walkthrough(page: Page, target_url: str) -> None:
         "(txt) => window.__ntSetCaption && window.__ntSetCaption(txt)",
         "1/4 · Calendar Rehearsal Candidate: Dutch Standup (opaque calref_*, zero raw title)",
     )
-    page.wait_for_timeout(1200)
+    page.wait_for_timeout(3500)
 
     # Select Dutch standup candidate explicitly & confirm to launch 90-second rehearsal
     guided_click(
         page,
         "candidate-shift_clarification",
         "1/4 · Selected Dutch Morning Standup & Shift Handover (target: confirmation)",
-        pause_after_ms=900,
+        pause_after_ms=3000,
     )
     guided_click(
         page,
         "confirm-candidate-btn",
         "1/4 · Confirming candidate & opening live /v1/rehearsal/ws 90-second session",
-        pause_after_ms=1000,
+        pause_after_ms=3500,
     )
 
     # Play Polly counterpart audio on Turn 1 & inspect SHORT_DOUBLE turn-boundary haptic
@@ -329,7 +333,7 @@ def run_guided_walkthrough(page: Page, target_url: str) -> None:
         page,
         "play-polly-audio-btn",
         "2/4 · Polly Counterpart Audio + SHORT_DOUBLE Turn-Boundary Haptic Pulse",
-        pause_after_ms=1350,
+        pause_after_ms=5000,
     )
 
     # Stream consented Dutch PTT speech on Turn 1 -> STEADY_BUZZ -> chunks -> 0B PCM deleted
@@ -337,7 +341,7 @@ def run_guided_walkthrough(page: Page, target_url: str) -> None:
         page,
         "simulate-speech-ptt-btn",
         "2/4 · Streaming Dutch PTT Speech -> Partial Transcription -> Immediate 0B PCM Deletion",
-        pause_after_ms=2350,
+        pause_after_ms=5500,
     )
 
     # Turn 2: Play counterpart prompt, demonstrate gentle pacing/confirmation repair, then confirm
@@ -345,19 +349,19 @@ def run_guided_walkthrough(page: Page, target_url: str) -> None:
         page,
         "play-polly-audio-btn",
         "3/4 · Turn 2 Counterpart: Asking to Confirm Tuesday 08:00 Shift & Handover",
-        pause_after_ms=1300,
+        pause_after_ms=4000,
     )
     guided_click(
         page,
         "try-ambiguous-reply-btn",
         "3/4 · Incomplete Reply ('Ja, dank u.') -> Gentle Functional Repair + SHORT_DOUBLE Haptic",
-        pause_after_ms=1500,
+        pause_after_ms=3500,
     )
     guided_click(
         page,
         "simulate-speech-ptt-btn",
         "3/4 · Speaking Explicit Dutch Shift & Handover Confirmation (Streaming PTT)",
-        pause_after_ms=2350,
+        pause_after_ms=4500,
     )
 
     # Scene 4: Post-rehearsal communication & pacing breakdown analysis
@@ -367,9 +371,9 @@ def run_guided_walkthrough(page: Page, target_url: str) -> None:
         "(txt) => window.__ntSetCaption && window.__ntSetCaption(txt)",
         "4/4 · Breakdown Analysis: Rubric Satisfied · 0B Raw PCM · Authentic Mastery Untouched",
     )
-    page.wait_for_timeout(1400)
+    page.wait_for_timeout(4500)
     page.get_by_test_id("privacy-ledger-list").scroll_into_view_if_needed()
-    page.wait_for_timeout(1500)
+    page.wait_for_timeout(4500)
 
 
 def record_demo_video(config: RecorderConfig) -> Path:
@@ -449,7 +453,47 @@ def record_demo_video(config: RecorderConfig) -> Path:
                 if video_handle is None:
                     raise RuntimeError("Playwright context did not produce a video handle")
                 recorded_path = Path(video_handle.path())
-                shutil.copy2(recorded_path, config.output_path)
+                narration_path = REPO_ROOT / "docs" / "media" / "nexttime-narration.mp3"
+                if narration_path.is_file():
+                    subprocess.run(
+                        [
+                            "ffmpeg",
+                            "-y",
+                            "-i",
+                            str(recorded_path),
+                            "-i",
+                            str(narration_path),
+                            "-c:v",
+                            "copy",
+                            "-c:a",
+                            "libopus",
+                            "-b:a",
+                            "128k",
+                            "-shortest",
+                            str(config.output_path),
+                        ],
+                        check=True,
+                    )
+                    subprocess.run(
+                        [
+                            "ffmpeg",
+                            "-y",
+                            "-i",
+                            str(config.output_path),
+                            "-c:v",
+                            "libx264",
+                            "-pix_fmt",
+                            "yuv420p",
+                            "-c:a",
+                            "aac",
+                            "-b:a",
+                            "128k",
+                            str(config.output_path.with_suffix(".mp4")),
+                        ],
+                        check=True,
+                    )
+                else:
+                    shutil.copy2(recorded_path, config.output_path)
 
     finally:
         if vite_proc is not None:

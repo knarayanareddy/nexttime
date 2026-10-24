@@ -20,6 +20,46 @@ import {
 
 type StepStage = "calendar" | "rehearsal" | "breakdown";
 type RuntimeMode = "sandbox" | "live";
+type PlayerViewMode = "walkthrough" | "interactive";
+
+interface WalkthroughChapter {
+  id: string;
+  timestampLabel: string;
+  startSec: number;
+  title: string;
+  summary: string;
+}
+
+const WALKTHROUGH_CHAPTERS: readonly WalkthroughChapter[] = [
+  {
+    id: "calendar",
+    timestampLabel: "0:00",
+    startSec: 0,
+    title: "Calendar Standup Candidate",
+    summary: "Opaque calref_* digest (zero raw title retained) & prior Bee breakdown.",
+  },
+  {
+    id: "polly_haptics",
+    timestampLabel: "0:04",
+    startSec: 3.8,
+    title: "Polly Audio & Pacing Haptics",
+    summary: "Lotte (nl-NL) counterpart prompt + SHORT_DOUBLE turn-boundary pulse.",
+  },
+  {
+    id: "streaming_ptt",
+    timestampLabel: "0:08",
+    startSec: 7.8,
+    title: "Real-Time Transcription & 0B PCM",
+    summary: "Streaming Dutch PTT chunks, gentle repair on 'Ja, dank u.', and 0B PCM zeroing.",
+  },
+  {
+    id: "breakdown",
+    timestampLabel: "0:16",
+    startSec: 15.8,
+    title: "Communication Breakdown Analysis",
+    summary: "Satisfied rubric_v1 criteria & privacy ledger (authentic mastery untouched).",
+  },
+];
 
 interface WireEventEntry {
   id: string;
@@ -33,6 +73,10 @@ function sleep(ms: number): Promise<void> {
 }
 
 export function App(): React.ReactElement {
+  const [activeView, setActiveView] = useState<PlayerViewMode>(() => {
+    const viewParam = new URLSearchParams(window.location.search).get("view");
+    return viewParam === "walkthrough" || viewParam === "video" ? "walkthrough" : "interactive";
+  });
   const [selectedSituation, setSelectedSituation] = useState<SituationId>("shift_clarification");
   const [stage, setStage] = useState<StepStage>("calendar");
   const [runtimeMode, setRuntimeMode] = useState<RuntimeMode>("sandbox");
@@ -54,6 +98,19 @@ export function App(): React.ReactElement {
   const [audioPlaying, setAudioPlaying] = useState<boolean>(false);
   const [audioProgressPct, setAudioProgressPct] = useState<number>(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const walkthroughVideoRef = useRef<HTMLVideoElement | null>(null);
+
+  const demoVideoUrl = `${import.meta.env.BASE_URL}media/nexttime-demo.webm`;
+  const demoCaptionsUrl = `${import.meta.env.BASE_URL}media/nexttime-demo.vtt`;
+
+  const seekWalkthroughChapter = (startSec: number): void => {
+    const el = walkthroughVideoRef.current;
+    if (!el) {
+      return;
+    }
+    el.currentTime = startSec;
+    void el.play().catch(() => undefined);
+  };
 
   const [latestHaptic, setLatestHaptic] = useState<HapticEventRecord | null>(null);
   const [hapticFlash, setHapticFlash] = useState<boolean>(false);
@@ -580,18 +637,142 @@ export function App(): React.ReactElement {
           </p>
         </div>
         <div className="nt-toolbar-controls">
-          <button
-            type="button"
-            className="nt-btn nt-btn--secondary"
-            data-testid="toggle-haptics-btn"
-            onClick={() => setHapticsEnabled((prev) => !prev)}
+          <div
+            className="nt-view-switcher"
+            role="group"
+            aria-label="Demo view switcher"
+            data-testid="header-view-switcher"
           >
-            {hapticsEnabled ? "Haptics: On (Turn-Boundary)" : "Haptics: Suppressed (Captions)"}
-          </button>
+            <button
+              type="button"
+              className={`nt-view-switch-btn ${
+                activeView === "walkthrough" ? "nt-view-switch-btn--active" : ""
+              }`}
+              aria-pressed={activeView === "walkthrough"}
+              data-testid="view-switch-walkthrough"
+              onClick={() => setActiveView("walkthrough")}
+            >
+              📹 Watch 90s Walkthrough
+            </button>
+            <button
+              type="button"
+              className={`nt-view-switch-btn ${
+                activeView === "interactive" ? "nt-view-switch-btn--active" : ""
+              }`}
+              aria-pressed={activeView === "interactive"}
+              data-testid="view-switch-interactive"
+              onClick={() => {
+                if (walkthroughVideoRef.current) {
+                  walkthroughVideoRef.current.pause();
+                }
+                setActiveView("interactive");
+              }}
+            >
+              💬 Interactive Dutch Rehearsal
+            </button>
+          </div>
+          {activeView === "interactive" && (
+            <button
+              type="button"
+              className="nt-btn nt-btn--secondary"
+              data-testid="toggle-haptics-btn"
+              onClick={() => setHapticsEnabled((prev) => !prev)}
+            >
+              {hapticsEnabled ? "Haptics: On (Turn-Boundary)" : "Haptics: Suppressed (Captions)"}
+            </button>
+          )}
         </div>
       </header>
 
-      <nav className="nt-stepper" aria-label="Rehearsal flow steps">
+      {activeView === "walkthrough" ? (
+        <main>
+          <section className="nt-card nt-card--selected" data-testid="walkthrough-video-panel">
+            <div className="nt-row-between">
+              <div>
+                <span className="nt-brand-eyebrow">
+                  Guided Walkthrough · Real-Time Transcription, Pacing Haptics &amp; Breakdown
+                  Analysis
+                </span>
+                <h2 className="nt-section-title" style={{ marginTop: 2 }}>
+                  NextTime 90-Second Dutch Standup Rehearsal Walkthrough
+                </h2>
+              </div>
+              <div className="nt-toolbar-controls">
+                <span className="nt-pill nt-pill--moss tabular">
+                  5.6 MB · VP9 WebM · 1280×800
+                </span>
+                <button
+                  type="button"
+                  className="nt-btn nt-btn--primary"
+                  data-testid="switch-to-interactive-cta"
+                  onClick={() => {
+                    if (walkthroughVideoRef.current) {
+                      walkthroughVideoRef.current.pause();
+                    }
+                    setActiveView("interactive");
+                  }}
+                >
+                  💬 Try Interactive Dutch Rehearsal →
+                </button>
+              </div>
+            </div>
+
+            <p className="nt-muted" style={{ marginTop: 4 }}>
+              Recorded end-to-end against <code>/v1/rehearsal/ws</code>: confirms an opaque{" "}
+              <code>calref_*</code> Dutch standup candidate, plays Amazon Polly counterpart audio,
+              streams push-to-talk Dutch speech chunks with turn-boundary{" "}
+              <code>SHORT_DOUBLE</code> / <code>STEADY_BUZZ</code> haptics and immediate{" "}
+              <code>0 bytes</code> raw PCM deletion, and inspects the post-rehearsal communication
+              breakdown analysis.
+            </p>
+
+            <div className="nt-video-stage">
+              <video
+                ref={walkthroughVideoRef}
+                className="nt-walkthrough-video"
+                src={demoVideoUrl}
+                controls
+                playsInline
+                preload="metadata"
+                data-testid="walkthrough-video-element"
+              >
+                <track
+                  kind="captions"
+                  src={demoCaptionsUrl}
+                  srcLang="en"
+                  label="English walkthrough captions"
+                />
+                Your browser does not support embedded WebM playback.{" "}
+                <a href={demoVideoUrl}>Download nexttime-demo.webm (5.6 MB)</a>.
+              </video>
+            </div>
+
+            <div
+              className="nt-chapter-grid"
+              aria-label="Walkthrough video chapters"
+              data-testid="walkthrough-chapters"
+            >
+              {WALKTHROUGH_CHAPTERS.map((chapter) => (
+                <button
+                  key={chapter.id}
+                  type="button"
+                  className="nt-chapter-btn"
+                  data-testid={`walkthrough-chapter-${chapter.id}`}
+                  onClick={() => seekWalkthroughChapter(chapter.startSec)}
+                >
+                  <span className="nt-pill nt-pill--info tabular">{chapter.timestampLabel}</span>
+                  <strong style={{ fontSize: 14.5, marginTop: 2 }}>{chapter.title}</strong>
+                  <span className="nt-muted" style={{ fontSize: 13 }}>
+                    {chapter.summary}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
+        </main>
+      ) : (
+        <>
+          <nav className="nt-stepper" aria-label="Rehearsal flow steps">
         <button
           type="button"
           className={`nt-step-btn ${stage === "calendar" ? "nt-step-btn--active" : ""}`}
@@ -1098,6 +1279,8 @@ export function App(): React.ReactElement {
           </section>
         </aside>
       </main>
+        </>
+      )}
     </div>
   );
 }

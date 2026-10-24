@@ -73,6 +73,26 @@ def test_github_pages_workflow_and_standalone_web_rehearsal_bundle() -> None:
     assert "shift_clarification" in scenarios_ts
     assert "repair_appointment" in scenarios_ts
 
+    # Verify linked demo video in apps/web/public/media/nexttime-demo.webm + header view switcher
+    linked_video = REPO_ROOT / "apps" / "web" / "public" / "media" / "nexttime-demo.webm"
+    assert linked_video.is_symlink(), "apps/web/public/media/nexttime-demo.webm must be a symlink"
+    assert linked_video.resolve() == DEFAULT_OUTPUT_VIDEO.resolve()
+
+    captions_vtt = REPO_ROOT / "apps" / "web" / "public" / "media" / "nexttime-demo.vtt"
+    assert captions_vtt.is_file()
+
+    app_tsx = (REPO_ROOT / "apps" / "web" / "src" / "App.tsx").read_text(encoding="utf-8")
+    assert "📹 Watch 90s Walkthrough" in app_tsx
+    assert "💬 Interactive Dutch Rehearsal" in app_tsx
+    assert "media/nexttime-demo.webm" in app_tsx
+    assert "<video" in app_tsx
+
+    dist_video = REPO_ROOT / "apps" / "web" / "dist" / "media" / "nexttime-demo.webm"
+    if dist_video.exists():
+        assert dist_video.is_file() and not dist_video.is_symlink()
+        with dist_video.open("rb") as fh:
+            assert fh.read(4) == WEBM_EBML_MAGIC
+
     workflow_path = REPO_ROOT / ".github" / "workflows" / "pages.yml"
     assert workflow_path.is_file()
     workflow = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))

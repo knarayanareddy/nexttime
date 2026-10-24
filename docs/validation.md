@@ -1,31 +1,28 @@
 # NextTime validation record
 
-Recorded 2026-10-23. Project tests, builds, fixture execution, and dependency audit ran under source-built CPython 3.12.12 with zlib, SQLite, and OpenSSL support; Python 3.11 was not substituted.
+Recorded 2026-10-24. Project tests, OpenAPI contract checks, wheel/sdist builds, fixture execution, and dependency vulnerability audits ran under CPython 3.12.12 with `uv` and OpenSSL support.
 
 ## Passing checks
 
 | Check | Result |
 | --- | --- |
-| Ruff lint + format check | Passed |
-| Strict mypy | Passed; 15 source files |
-| Unit tests | 66/66 passed |
-| Branch-aware domain + gateway coverage | 95.51%; required gate 90% retained |
-| Canonical schema/contract tests | 10/10 passed; schema copy byte-identical and gateway input/output contracts verified |
-| Privacy/security tests | 3/3 passed |
-| Third-party dependency audit | No known vulnerabilities; editable local package skipped |
-| Source distribution + wheel | Both built successfully |
-| Fixture walking path | Consent-aware minimization, duplicate-source safety, bounded self-evidenced breakdown proposal (`<= 3` breakdowns with ASR/model confidence), unconfirmed no-update outcome, two synthetic reviewed attempts with linked comparison/replay-safe progress, and a 90-second/two-turn rehearsal with quiet-hours scheduling and duplicate-safe fixture notification requests |
-| **Total tests** | **79/79 passed** |
+| Ruff lint + format check | Passed (`ruff check .` and `ruff format --check .`) |
+| Strict mypy | Passed (`0` issues across `34` source files in `packages/` and `services/`) |
+| Unit tests | `85/85` passed |
+| Branch-aware coverage (`domain`, `model-gateway`, `bee-adapter`, `minimization`, `bee-bridge`, `api`) | `91.87%` branch coverage (exceeds `90%` gate) |
+| Canonical schema & OpenAPI 3.1 contract tests | `12/12` passed (`real-world-attempt`, `breakdown_propose.v1`, `openapi.v1.json` zero-drift, and pure-stdlib domain AST check) |
+| Privacy & authorization security tests | `4/4` passed (`AC-NT-019` cross-learner IDOR denial, `SEC-NT-003` learner/bridge token scope separation, consent revocation cascade, and sensitive-topic fail-closed checks) |
+| Third-party dependency audit | `0` known vulnerabilities (`uv run pip-audit --skip-editable`) |
+| Source distribution + wheel | Built cleanly (`uv build`) |
+| Fixture walking path (`make dev`) | Passed |
+| **Total automated tests** | **`101/101` passed** |
 
-The synthetic transcript path excludes other-speaker and ambiguous turns, excludes other-speaker-like turns from self memos, applies narrow deterministic identifier redaction, and always returns `review_required`. Cached source references remain subject to consent and revocation checks. The source deletion deadline is computed as 24 hours after successful minimization; it is metadata for a future deletion adapter, not proof of deletion.
+## Validated local slices
 
-The breakdown-proposal slice (`FR-NT-005`) accepts only minimized self-excerpts (`other_speaker_transcript_retained=False`), blocks lexical markers for excluded sensitive situations (`SEC-NT-006`), proposes at most three functional breakdowns with verified learner-owned self-evidence excerpts and conservative combined `min(asr_confidence, model_confidence)` confidence, downgrades criterion assertions below `0.75` to `unknown` (`NFR-NT-006`, `SEC-NT-008`), rejects prohibited emotion/identity/accent/fluency-score inferences (`SEC-NT-007`), and produces schema-valid `awaiting_learner_review` attempt drafts ready for `AttemptReviewService`. `GatewayBreakdownExtractor` exercises the shared bounded `ModelGateway` (`INT-NT-005`: input/output schema validation, at most one repair retry, token/cost/timeout budgets, circuit breaker, safe telemetry without raw transcripts, and labeled deterministic fallback when AWS Bedrock is unconfigured or invalid). No live AWS Bedrock call is claimed.
-
-The original rubric fixture still returns `partial`, `confirmation_required: true`, `required_confirmation_unresolved`, and `authentic_skill_update: false`. A separate in-memory reviewed copy requires every proposed breakdown to be reviewed before attempt confirmation, recomputes corrected criterion outcomes, and applies confirmed breakdown-skill updates once per skill. Tests prove rejected breakdowns and unknown outcomes do not update mastery, contradictory confirmation evidence fails, duplicate confirmation does not reapply updates, and cross-learner/stale-version access fails. No authentic learner outcome is inferred.
-
-The linked-progress fixture accepts only confirmed, minimized authentic-attempt documents with the same learner, recurrence, situation, and rubric, ordered by recording time. It reports criterion evidence deltas and uncertainty, distinguishes explicit improvement from new positive evidence after an unknown prior result, and makes no causal claim. Replaying a confirmed review result returns the existing comparison without reapplying its supplied skill projection; rehearsal metadata remains separate and cannot change authentic skills. Tests also reject unconfirmed, cross-learner, mislinked, out-of-order, and conflicting replay inputs; each projection service is explicitly scoped to its first confirmed learner. Both walking attempts are synthetic reviewed fixtures, not Bee observations.
-
-The deterministic rehearsal service targets only a confirmed `confirmation_missing` breakdown, requires a learner-marked recurrence, and offers an explicit quiet-hours choice. Its fixture notification is `fixture_request_not_sent`; duplicate notification/turn events are safe, ambiguous turns progress through repair/easier-alternative support to abandonment, and text/tap modes are supported. Completing the two-turn rehearsal leaves authentic skill states unchanged. No audio, iOS, Bedrock, Polly, actual notification, or learning outcome is claimed.
+1. **Speaker turn separation (`FR-NT-003`):** `packages/domain/nexttime_domain/speaker_separation.py` separates learner turns from other speakers across `bee_speaker_labels`, `aws_diarization` (requiring an enrolled speaker cluster before attributing learner speech), `learner_labeled`, and `self_only`. Temporal crosstalk overlaps, low speaker/ASR confidence, and unrecognized labels downgrade to `unknown` (`review_required=True`) and are excluded from learner excerpts.
+2. **Deletion & consent revocation worker (`FR-NT-014`, `SEC-NT-004`, `SEC-NT-005`, `NFR-NT-004`):** `packages/domain/nexttime_domain/deletion.py` and `services/minimization/nexttime_minimization/` execute verified 4-stage deletion (`transient_source`, `audio_and_rehearsal`, `caches_and_prompts`, `derived_learner_state`) with stage receipts, fault/alarm reporting and idempotent retry recovery, >24h overdue transient source alarms, immediate raw rehearsal audio deletion, 24h unsaved rehearsal transcript sweeps, tombstones, recent-auth-gated account deletion, and minimized learner data export.
+3. **Local Bee CLI/spool ingestion bridge (`FR-NT-001` local slice):** `packages/bee-adapter/` and `services/bee-bridge/` implement `BeeAdapter`, `BeeCliAdapter` (`asyncio.create_subprocess_exec`, 30s timeout, 1 MiB output cap, secret/email/phone/utterance log redaction, zero invented Bee CLI flags), `LocalSpoolBeeAdapter` (`provenance="fixture"`), and `BeeIngestionBridge` (consent/revocation gate, lease locking, duplicate-reference idempotency, fail-closed transient cleanup on sensitive content, and post-persistence cursor acknowledgement).
+4. **FastAPI `/v1` rehearsal & learner progress backend (`services/api`):** Exposes `/v1/consents`, `/v1/attempts/ingest`, `/v1/attempts`, `/v1/attempts/{id}/review`, `/v1/attempts/{id}/exclude`, `/v1/recurrences`, `/v1/recurrences/{id}/calendar-link`, `/v1/recurrences/{id}/rehearsal`, `/v1/rehearsals/{id}`, `/v1/rehearsals/{id}/turns`, `/v1/rehearsals/{id}/complete`, `/v1/progress`, `/v1/export`, and `/v1/account` with RFC 9457 `application/problem+json` errors, 24-hour `Idempotency-Key` enforcement, optimistic `expected_version` / `If-Match` concurrency, 15-minute signed counterpart audio URLs, push-to-talk + accessible `tap`/`text` rehearsal turns that never mutate authentic skill mastery (`AC-NT-015`), and non-gamified linked-attempt `OutcomeComparison` progress history (`AC-NT-016`).
 
 ## Reproduce
 
@@ -33,8 +30,6 @@ The deterministic rehearsal service targets only a confirmed `confirmation_missi
 make lint typecheck test-unit test-contract test-security build dev
 ```
 
-Use a Python 3.12 runtime with zlib, SQLite, and SSL/TLS so the normal coverage and audit commands are self-contained. Do not skip the audit or run project tests under 3.11.
-
 ## Not evidenced
 
-No Bee/Apple Watch data, CLI/MCP ingestion, diarization model, iOS behavior, authentic transcript, actual transient deletion, revocation worker, durable learner/attempt/idempotency store, database scan, rehearsal targeting/audio, ASR accent/device evaluation, participant outcome, performance, deployment, or release behavior was executed. Confirmed-breakdown updates are deliberately narrow; durable/API/iOS progress presentation, criterion-wide skill-model expansion, native rehearsal audio/notification delivery, and deletion adapters remain incomplete. The comparison ledger is in-memory and uses supplied review-result skill projections rather than claiming a second independent skill-update engine. The build-complete gate remains open.
+Live Bee CLI/MCP commands and physical Bee/Apple Watch hardware (`AC-NT-020`), native iOS SwiftUI rehearsal UI/notifications (`FR-NT-010`, `INT-NT-003`), live AWS Polly/Transcribe/Bedrock calls (`INT-NT-004`, `INT-NT-005`), durable PostgreSQL/S3/KMS storage and CDK infrastructure (`make test-integration`, `make test-infra`, `make test-e2e`), ASR accent/device study slices (`SEC-NT-008`), and latency/SLO benchmarks (`NFR-NT-001`, `NFR-NT-002`) remain unexecuted.

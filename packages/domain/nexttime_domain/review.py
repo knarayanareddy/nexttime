@@ -154,6 +154,30 @@ class AttemptReviewService:
         self._commit_timestamp(timestamp)
         return self._result()
 
+    def redact_breakdown_excerpt(
+        self,
+        *,
+        actor_learner_id: str,
+        expected_version: int,
+        breakdown_id: str,
+        reviewed_at: datetime,
+    ) -> AttemptReviewResult:
+        self._require_actor(actor_learner_id)
+        breakdown = next(
+            (item for item in self._document["breakdowns"] if item["breakdown_id"] == breakdown_id),
+            None,
+        )
+        if breakdown is None:
+            raise ValueError("breakdown_not_found")
+        if breakdown["self_evidence_excerpt"] == "[redacted]":
+            return self._result()
+        self._require_editable()
+        self._require_version(expected_version)
+        timestamp = self._review_timestamp(reviewed_at)
+        breakdown["self_evidence_excerpt"] = "[redacted]"
+        self._commit_timestamp(timestamp)
+        return self._result()
+
     def _corrected_criteria(
         self, corrections: tuple[CriterionCorrection, ...]
     ) -> list[dict[str, Any]]:

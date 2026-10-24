@@ -1,42 +1,45 @@
 # NextTime
 
 **Track:** Bee
-**Status:** consent-aware minimization, learner review/skill update, deterministic rehearsal, and linked-attempt comparison slices validated locally; Bee/iOS applications not implemented
+**Status:** speaker turn separation (`FR-NT-003`), verified in-memory deletion/revocation worker (`FR-NT-014`), local CLI/spool Bee ingestion bridge (`FR-NT-001` local slice), bounded breakdown-proposal gateway (`FR-NT-005` / `INT-NT-005`), and FastAPI `/v1` rehearsal & progress backend (`services/api`) validated locally; live Bee hardware, AWS adapters, durable storage, and iOS app remain unimplemented
 **Agent entry point:** [`AGENTS.md`](./AGENTS.md)
 
-NextTime evaluates authentic, consented functional-communication attempts and keeps rehearsal evidence separate from real-world mastery.
+NextTime evaluates authentic, consented functional-communication attempts in Dutch (`nl` with `en` support) and keeps 90-second rehearsal practice strictly separate from real-world mastery.
 
-## Local foundation
+## Local commands
 
-Requirements: Python 3.12, `uv`, and `make`. Dependencies are locked in `uv.lock`; runtime domain code has no third-party runtime dependency.
+Requirements: Python 3.12 (`>=3.12,<3.13`), `uv`, and `make`. Dependencies are pinned in `pyproject.toml` and locked in `uv.lock`; `packages/domain` remains pure Python stdlib.
 
 ```bash
 make setup                 # uv sync --frozen and safe .env.local
-make dev                   # fictional minimized-attempt + rehearsal fixtures
-make lint typecheck
-make test-unit test-contract test-security
-make build
+make dev                   # deterministic domain + rehearsal walking skeleton
+make dev-api               # run FastAPI /v1 server on 0.0.0.0:8000
+make lint typecheck        # ruff check + format check + strict mypy across all packages/services
+make test-unit             # >=90% branch coverage across domain, adapters, workers, and API
+make test-contract         # JSON Schema, OpenAPI 3.1 zero-drift, and stdlib boundary checks
+make test-security         # IDOR/authz/privacy/revocation tests + pip-audit --skip-editable
+make build                 # build sdist and wheel
 ```
 
-Unit tests enforce at least 90% branch-aware domain coverage. `make test-security` runs privacy tests and `pip-audit --skip-editable`; the editable local distribution is not a third-party dependency. The audit runner needs working SSL/TLS.
-
-Native iOS, Bee integration, database/transient storage, infrastructure, E2E, and deployment targets intentionally fail while their real implementations are absent.
+Native iOS, live Bee hardware, PostgreSQL/S3 integration, CDK infrastructure, E2E, and deployment targets intentionally exit non-zero until those external systems are implemented.
 
 ## Workspace map
 
 | Path | Purpose |
 | --- | --- |
 | [`SPEC.md`](./SPEC.md) | Canonical requirements and vertical slices |
-| [`schemas/real-world-attempt.schema.json`](./schemas/real-world-attempt.schema.json) | Canonical minimized-attempt contract |
-| [`packages/domain/nexttime_domain/`](./packages/domain/nexttime_domain/) | Consent gates, learner-only minimization, rubric evaluation, learner review/correction, bounded authentic skill updates, deterministic rehearsal, and linked-attempt progress projection |
-| [`packages/contracts/`](./packages/contracts/) | Byte-identical schema copy used by contract tests |
-| [`packages/rubrics/`](./packages/rubrics/) | Draft educator-review-required rubric content |
-| [`tests/`](./tests/) | Unit, schema-contract, and privacy-boundary tests |
-| [`docs/`](./docs/) | Preflight, architecture, data inventory, dependencies, and validation |
-| [`ui/`](./ui/) | Static design guidance, not an iOS application |
+| [`schemas/real-world-attempt.schema.json`](./schemas/real-world-attempt.schema.json) | Controlled minimized-attempt JSON Schema |
+| [`packages/domain/nexttime_domain/`](./packages/domain/nexttime_domain/) | Pure-stdlib speaker separation, consent gates, minimization, rubric evaluation, breakdown proposals, learner review, deterministic 90s rehearsal, linked progress, and deletion models |
+| [`packages/model-gateway/nexttime_model_gateway/`](./packages/model-gateway/nexttime_model_gateway/) | Bounded `ModelGateway` port, repair/budget/circuit guards, and deterministic breakdown fallback |
+| [`packages/bee-adapter/nexttime_bee_adapter/`](./packages/bee-adapter/nexttime_bee_adapter/) | `BeeAdapter` protocol, bounded `BeeCliAdapter`, log redaction, and fixture `LocalSpoolBeeAdapter` |
+| [`services/bee-bridge/nexttime_bee_bridge/`](./services/bee-bridge/nexttime_bee_bridge/) | Local consented Bee transcript ingestion listener (`nexttime-bee-bridge` CLI + lease cursor) |
+| [`services/minimization/nexttime_minimization/`](./services/minimization/nexttime_minimization/) | `InMemoryArtifactStore` and 4-stage `DeletionPipelineWorker` (revocation, TTL sweeps, overdue alarms, tombstones) |
+| [`services/api/nexttime_api/`](./services/api/nexttime_api/) | FastAPI `/v1` backend for consents, ingestion, attempt review, recurrence/rehearsal sessions, learner progress history, export, and account deletion |
+| [`packages/contracts/`](./packages/contracts/) | Attempt schema copy, model-gateway schemas, and drift-checked `openapi.v1.json` |
+| [`packages/rubrics/`](./packages/rubrics/) | Draft educator-review-required situation rubrics |
+| [`tests/`](./tests/) | Unit, contract, and security/privacy test suites |
+| [`docs/`](./docs/) | Preflight, architecture, data inventory, dependencies, and validation records |
 
 ## External blockers
 
-Actual Bee/Apple Watch and documented CLI/MCP connectivity, iOS/Swift tooling, Polly/Transcribe/Bedrock, persistence/deletion workers, participants, accent/device evaluation, and release evidence remain blocked or unimplemented. The original fixture remains unconfirmed and does not update skill state; a separate synthetic reviewed copy demonstrates one bounded update, not real learner progress. The rehearsal fixture targets a confirmed breakdown, schedules around quiet hours, deduplicates notification/turn events, and leaves authentic skills unchanged; its notification is explicitly not sent. A second synthetic reviewed attempt now exercises same-recurrence/rubric comparison, criterion evidence deltas, uncertainty, replay-safe progress recording, and separate rehearsal history. It is not a real Bee attempt or a causal learning result.
-
-Maintain [`SPEC_TRACEABILITY.md`](./SPEC_TRACEABILITY.md) and [`SPEC_DEVIATIONS.md`](./SPEC_DEVIATIONS.md). Never use rehearsal or fixture data as authentic learner progress.
+Physical Bee/Apple Watch hardware and verified official Bee CLI/MCP subcommands, native iOS 17+ SwiftUI client, live AWS Polly/Transcribe/Bedrock/S3/KMS/RDS infrastructure, educator-signed rubric review, and participant evaluation remain blocked or unimplemented. Maintain [`SPEC_TRACEABILITY.md`](./SPEC_TRACEABILITY.md) and [`SPEC_DEVIATIONS.md`](./SPEC_DEVIATIONS.md), and never claim rehearsal or fixture results as authentic learner outcomes.

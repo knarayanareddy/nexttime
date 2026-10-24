@@ -3,7 +3,7 @@ UV ?= uv
 PIP_AUDIT ?= $(UV) run pip-audit
 PIP_AUDIT_ARGS ?=
 
-.PHONY: bootstrap setup dev lint typecheck test-unit test-contract test-integration test-e2e test-infra test-security build deploy evidence
+.PHONY: bootstrap setup dev dev-api lint typecheck test-unit test-contract test-integration test-e2e test-infra test-security build deploy evidence
 
 bootstrap:
 	$(UV) --version
@@ -16,15 +16,27 @@ setup: bootstrap
 dev:
 	$(UV) run python -m nexttime_domain.walking_skeleton
 
+dev-api:
+	$(UV) run uvicorn nexttime_api.main:app --host 0.0.0.0 --port 8000
+
 lint:
 	$(UV) run ruff check .
 	$(UV) run ruff format --check .
 
 typecheck:
-	$(UV) run mypy packages/domain packages/model-gateway
+	$(UV) run mypy packages/domain packages/model-gateway packages/bee-adapter services/minimization services/bee-bridge services/api
 
 test-unit:
-	$(UV) run pytest tests/unit --cov=nexttime_domain --cov=nexttime_model_gateway --cov-branch --cov-report=term-missing --cov-fail-under=90
+	$(UV) run pytest tests/unit \
+		--cov=nexttime_domain \
+		--cov=nexttime_model_gateway \
+		--cov=nexttime_bee_adapter \
+		--cov=nexttime_minimization \
+		--cov=nexttime_bee_bridge \
+		--cov=nexttime_api \
+		--cov-branch \
+		--cov-report=term-missing \
+		--cov-fail-under=90
 
 test-contract:
 	$(UV) run pytest tests/contract

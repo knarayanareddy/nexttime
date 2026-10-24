@@ -36,6 +36,16 @@ from .deletion import (
     scan_overdue_transient_sources,
     stages_for_scope,
 )
+from .haptics import (
+    HapticFeedbackEvent,
+    HapticPreferences,
+    HapticPulsePattern,
+    HapticPulseSequence,
+    RehearsalHapticGenerator,
+    RehearsalPacingTrigger,
+    map_trigger_to_pattern,
+    pulse_sequence_for,
+)
 from .minimization import validate_minimized_attempt
 from .models import (
     AttemptEvaluationInput,
@@ -127,6 +137,10 @@ __all__ = [
     "FixtureRehearsalService",
     "FunctionalProgress",
     "FunctionalWin",
+    "HapticFeedbackEvent",
+    "HapticPreferences",
+    "HapticPulsePattern",
+    "HapticPulseSequence",
     "LearnerExportPackage",
     "LearnerTurnLabel",
     "MAX_PROPOSED_BREAKDOWNS",
@@ -146,6 +160,8 @@ __all__ = [
     "RawExtractionPayload",
     "RawSpeakerSegment",
     "Recurrence",
+    "RehearsalHapticGenerator",
+    "RehearsalPacingTrigger",
     "RehearsalScenario",
     "RehearsalState",
     "Rubric",
@@ -171,7 +187,9 @@ __all__ = [
     "deterministic_ulid",
     "ensure_non_sensitive_excerpts",
     "evaluate_authentic_attempt",
+    "map_trigger_to_pattern",
     "minimize_transcript",
+    "pulse_sequence_for",
     "redact_deterministic_identifiers",
     "require_processing_consent",
     "rubric_from_mapping",

@@ -15,21 +15,31 @@ from .schemas import (
     AttemptListResponse,
     AttemptReviewRequest,
     AttemptReviewResponse,
+    CalendarCandidateConfirmRequest,
+    CalendarCandidateListResponse,
+    CalendarIcsSyncRequest,
     CalendarLinkRequest,
+    CalendarSyncSummaryResponse,
     ConsentCreateRequest,
     ConsentResponse,
     ConsentRevokeResponse,
     DeletionJobResponse,
     ExportResponse,
+    HapticEventRequest,
+    HapticFeedbackEventResponse,
     HealthResponse,
+    PreMeetingRehearsalCardResponse,
     ProgressHistoryResponse,
     RecurrenceCreateRequest,
     RecurrenceResponse,
+    RehearsalCardListResponse,
     RehearsalCompleteRequest,
     RehearsalCreateRequest,
     RehearsalSessionResponse,
     RehearsalTurnSubmitRequest,
     RehearsalTurnSubmitResponse,
+    TranscribeChunksRequest,
+    TurnTranscriptionResponse,
 )
 from .state import ApiRuntimeState
 
@@ -373,6 +383,159 @@ def create_app(state: ApiRuntimeState | None = None) -> FastAPI:
             payload={"rehearsal_id": rehearsal_id, "body": body.model_dump(mode="json")},
             status_code=200,
             action=lambda: runtime.complete_rehearsal(
+                actor_id=principal.actor_id,
+                rehearsal_id=rehearsal_id,
+                req=body,
+            ),
+        )
+
+    @app.post(
+        "/v1/calendar/ics-sync",
+        response_model=CalendarSyncSummaryResponse,
+        tags=["recurrences"],
+    )
+    async def sync_ics_calendar(
+        request: Request,
+        body: CalendarIcsSyncRequest,
+        principal: Principal = Depends(_learner),  # noqa: B008
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ) -> JSONResponse:
+        key = runtime.idempotency.require_key(idempotency_key)
+        payload = body.model_dump(mode="json")
+        now = runtime.now()
+        cached = runtime.idempotency.check(
+            actor_id=principal.actor_id,
+            method=request.method,
+            path=request.url.path,
+            idempotency_key=key,
+            payload=payload,
+            now=now,
+        )
+        if cached is not None:
+            return JSONResponse(status_code=cached[0], content=cached[1])
+        result = await runtime.sync_ics_calendar(
+            actor_id=principal.actor_id,
+            req=body,
+        )
+        runtime.idempotency.save(
+            actor_id=principal.actor_id,
+            method=request.method,
+            path=request.url.path,
+            idempotency_key=key,
+            payload=payload,
+            status_code=200,
+            response_body=result,
+            now=now,
+        )
+        return JSONResponse(status_code=200, content=result)
+
+    @app.get(
+        "/v1/calendar/candidates",
+        response_model=CalendarCandidateListResponse,
+        tags=["recurrences"],
+    )
+    def list_calendar_candidates(
+        principal: Principal = Depends(_learner),  # noqa: B008
+    ) -> dict[str, Any]:
+        return runtime.list_calendar_candidates(actor_id=principal.actor_id)
+
+    @app.post(
+        "/v1/calendar/candidates/{candidate_id}/confirm",
+        response_model=PreMeetingRehearsalCardResponse,
+        status_code=201,
+        tags=["recurrences"],
+    )
+    def confirm_calendar_candidate(
+        candidate_id: str,
+        request: Request,
+        body: CalendarCandidateConfirmRequest,
+        principal: Principal = Depends(_learner),  # noqa: B008
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ) -> JSONResponse:
+        return _idempotent_mutation(
+            request,
+            actor_id=principal.actor_id,
+            idempotency_key=idempotency_key,
+            payload={"candidate_id": candidate_id, "body": body.model_dump(mode="json")},
+            status_code=201,
+            action=lambda: runtime.confirm_calendar_candidate(
+                actor_id=principal.actor_id,
+                candidate_id=candidate_id,
+                req=body,
+            ),
+        )
+
+    @app.get(
+        "/v1/rehearsal-cards",
+        response_model=RehearsalCardListResponse,
+        tags=["rehearsals"],
+    )
+    def list_rehearsal_cards(
+        principal: Principal = Depends(_learner),  # noqa: B008
+    ) -> dict[str, Any]:
+        return runtime.list_rehearsal_cards(actor_id=principal.actor_id)
+
+    @app.post(
+        "/v1/rehearsals/{rehearsal_id}/transcribe-chunks",
+        response_model=TurnTranscriptionResponse,
+        tags=["rehearsals"],
+    )
+    async def transcribe_rehearsal_chunks(
+        rehearsal_id: str,
+        request: Request,
+        body: TranscribeChunksRequest,
+        principal: Principal = Depends(_learner),  # noqa: B008
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ) -> JSONResponse:
+        key = runtime.idempotency.require_key(idempotency_key)
+        payload = {"rehearsal_id": rehearsal_id, "body": body.model_dump(mode="json")}
+        now = runtime.now()
+        cached = runtime.idempotency.check(
+            actor_id=principal.actor_id,
+            method=request.method,
+            path=request.url.path,
+            idempotency_key=key,
+            payload=payload,
+            now=now,
+        )
+        if cached is not None:
+            return JSONResponse(status_code=cached[0], content=cached[1])
+        result = await runtime.transcribe_rehearsal_chunks(
+            actor_id=principal.actor_id,
+            rehearsal_id=rehearsal_id,
+            req=body,
+        )
+        runtime.idempotency.save(
+            actor_id=principal.actor_id,
+            method=request.method,
+            path=request.url.path,
+            idempotency_key=key,
+            payload=payload,
+            status_code=200,
+            response_body=result,
+            now=now,
+        )
+        return JSONResponse(status_code=200, content=result)
+
+    @app.post(
+        "/v1/rehearsals/{rehearsal_id}/haptics",
+        response_model=HapticFeedbackEventResponse,
+        tags=["rehearsals"],
+    )
+    def emit_rehearsal_haptic(
+        rehearsal_id: str,
+        request: Request,
+        body: HapticEventRequest,
+        principal: Principal = Depends(_learner),  # noqa: B008
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ) -> JSONResponse:
+        return _idempotent_mutation(
+            request,
+            actor_id=principal.actor_id,
+            idempotency_key=idempotency_key,
+            payload={"rehearsal_id": rehearsal_id, "body": body.model_dump(mode="json")},
+            status_code=200,
+            action=lambda: runtime.emit_rehearsal_haptic(
                 actor_id=principal.actor_id,
                 rehearsal_id=rehearsal_id,
                 req=body,

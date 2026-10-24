@@ -24,13 +24,15 @@ lint:
 	$(UV) run ruff format --check .
 
 typecheck:
-	$(UV) run mypy packages/domain packages/model-gateway packages/bee-adapter services/minimization services/bee-bridge services/api
+	$(UV) run mypy packages/domain packages/model-gateway packages/bee-adapter services/calendar services/rehearsal services/minimization services/bee-bridge services/api
 
 test-unit:
 	$(UV) run pytest tests/unit \
 		--cov=nexttime_domain \
 		--cov=nexttime_model_gateway \
 		--cov=nexttime_bee_adapter \
+		--cov=nexttime_calendar \
+		--cov=nexttime_rehearsal \
 		--cov=nexttime_minimization \
 		--cov=nexttime_bee_bridge \
 		--cov=nexttime_api \

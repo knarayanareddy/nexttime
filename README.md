@@ -1,7 +1,7 @@
 # NextTime
 
 **Track:** Bee
-**Status:** speaker turn separation (`FR-NT-003`), verified in-memory deletion/revocation worker (`FR-NT-014`), local CLI/spool Bee ingestion bridge (`FR-NT-001` local slice), bounded breakdown-proposal gateway (`FR-NT-005` / `INT-NT-005`), and FastAPI `/v1` rehearsal & progress backend (`services/api`) validated locally; live Bee hardware, AWS adapters, durable storage, and iOS app remain unimplemented
+**Status:** speaker turn separation (`FR-NT-003`), verified in-memory deletion/revocation worker (`FR-NT-014`), local CLI/spool Bee ingestion bridge (`FR-NT-001` local slice), bounded breakdown-proposal gateway (`FR-NT-005` / `INT-NT-005`), user-confirmed calendar candidate sync (`services/calendar`, `FR-NT-008` / `INT-NT-006`), consented push-to-talk audio chunk transcriber (`services/rehearsal`, `INT-NT-004` / `SEC-NT-004`), iPhone turn-boundary haptic event generator (`packages/domain/nexttime_domain/haptics.py`), and FastAPI `/v1` rehearsal & progress backend (`services/api`) validated locally; live Bee hardware, live AWS network transports, durable storage, and native iOS SwiftUI app remain unimplemented
 **Agent entry point:** [`AGENTS.md`](./AGENTS.md)
 
 NextTime evaluates authentic, consented functional-communication attempts in Dutch (`nl` with `en` support) and keeps 90-second rehearsal practice strictly separate from real-world mastery.
@@ -29,12 +29,14 @@ Native iOS, live Bee hardware, PostgreSQL/S3 integration, CDK infrastructure, E2
 | --- | --- |
 | [`SPEC.md`](./SPEC.md) | Canonical requirements and vertical slices |
 | [`schemas/real-world-attempt.schema.json`](./schemas/real-world-attempt.schema.json) | Controlled minimized-attempt JSON Schema |
-| [`packages/domain/nexttime_domain/`](./packages/domain/nexttime_domain/) | Pure-stdlib speaker separation, consent gates, minimization, rubric evaluation, breakdown proposals, learner review, deterministic 90s rehearsal, linked progress, and deletion models |
+| [`packages/domain/nexttime_domain/`](./packages/domain/nexttime_domain/) | Pure-stdlib speaker separation, consent gates, minimization, rubric evaluation, breakdown proposals, learner review, deterministic 90s rehearsal, turn-boundary iPhone haptic cues (`SHORT_DOUBLE`, `STEADY_BUZZ`), linked progress, and deletion models |
 | [`packages/model-gateway/nexttime_model_gateway/`](./packages/model-gateway/nexttime_model_gateway/) | Bounded `ModelGateway` port, repair/budget/circuit guards, and deterministic breakdown fallback |
 | [`packages/bee-adapter/nexttime_bee_adapter/`](./packages/bee-adapter/nexttime_bee_adapter/) | `BeeAdapter` protocol, bounded `BeeCliAdapter`, log redaction, and fixture `LocalSpoolBeeAdapter` |
+| [`services/calendar/nexttime_calendar/`](./services/calendar/nexttime_calendar/) | RFC 5545 `.ics` and incremental read-only Google Calendar candidate adapter (3 Dutch situations, `SEC-NT-006` exclusion, zero raw title retention, learner-confirmed `PreMeetingRehearsalCard` queue) |
+| [`services/rehearsal/nexttime_rehearsal/`](./services/rehearsal/nexttime_rehearsal/) | Bounded push-to-talk Dutch audio chunk transcriber with AWS `vnd.amazon.eventstream` CRC32 codec, streaming consent gate, covert-mic rejection, and immediate in-place PCM zeroing |
 | [`services/bee-bridge/nexttime_bee_bridge/`](./services/bee-bridge/nexttime_bee_bridge/) | Local consented Bee transcript ingestion listener (`nexttime-bee-bridge` CLI + lease cursor) |
 | [`services/minimization/nexttime_minimization/`](./services/minimization/nexttime_minimization/) | `InMemoryArtifactStore` and 4-stage `DeletionPipelineWorker` (revocation, TTL sweeps, overdue alarms, tombstones) |
-| [`services/api/nexttime_api/`](./services/api/nexttime_api/) | FastAPI `/v1` backend for consents, ingestion, attempt review, recurrence/rehearsal sessions, learner progress history, export, and account deletion |
+| [`services/api/nexttime_api/`](./services/api/nexttime_api/) | FastAPI `/v1` backend for consents, ingestion, attempt review, calendar candidate sync & confirmation, recurrence/rehearsal sessions, PTT chunk transcription, rehearsal haptics, learner progress history, export, and account deletion |
 | [`packages/contracts/`](./packages/contracts/) | Attempt schema copy, model-gateway schemas, and drift-checked `openapi.v1.json` |
 | [`packages/rubrics/`](./packages/rubrics/) | Draft educator-review-required situation rubrics |
 | [`tests/`](./tests/) | Unit, contract, and security/privacy test suites |

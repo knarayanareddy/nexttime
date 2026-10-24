@@ -311,3 +311,151 @@ class ExportResponse(StrictModel):
     comparisons: list[dict[str, Any]]
     skill_states: dict[str, dict[str, Any]]
     other_speaker_transcript_included: Literal[False]
+
+
+class CalendarIcsSyncRequest(StrictModel):
+    ics_payload: str = Field(min_length=15, max_length=262_144)
+    default_time_zone: str = Field(default="Europe/Amsterdam", min_length=1, max_length=64)
+    horizon_days: int = Field(default=14, ge=1, le=60)
+    provenance: Literal["fixture", "live"] = "fixture"
+
+
+class CalendarCandidateResponse(StrictModel):
+    candidate_id: str
+    learner_id: str
+    provider: Literal["icalendar", "google_calendar"]
+    calendar_event_reference: str
+    situation: str
+    matched_attempt_id: str
+    matched_breakdown_id: str
+    scheduled_for: str
+    proposed_rehearsal_at: str
+    time_zone: str
+    quiet_hours: bool
+    confirmation_state: Literal["awaiting_learner_confirmation", "confirmed", "dismissed"]
+    provenance: Literal["fixture", "live"]
+    created_at: str
+
+
+class CalendarSyncSummaryResponse(StrictModel):
+    learner_id: str
+    provider: Literal["icalendar", "google_calendar"]
+    candidates: list[CalendarCandidateResponse]
+    excluded_sensitive_count: int
+    ignored_unrelated_count: int
+    cancelled_count: int
+    next_sync_token: str | None
+    provenance: Literal["fixture", "live"]
+
+
+class CalendarCandidateListResponse(StrictModel):
+    items: list[CalendarCandidateResponse]
+
+
+class CalendarCandidateConfirmRequest(StrictModel):
+    rehearsal_at: datetime | None = None
+    notification_behavior: Literal["local_notification", "open_template_only"] | None = None
+
+
+class PreMeetingRehearsalCardResponse(StrictModel):
+    card_id: str
+    learner_id: str
+    candidate_id: str
+    recurrence_id: str
+    attempt_id: str
+    breakdown_id: str
+    situation: str
+    target_function: str
+    scheduled_for: str
+    rehearsal_at: str
+    time_zone: str
+    estimated_seconds: int
+    quiet_hours: bool
+    notification_behavior: str
+    event_source: Literal["explicit_calendar_link"]
+    calendar_event_reference: str
+    status: Literal["queued", "cancelled"]
+    provenance: Literal["fixture", "live"]
+
+
+class RehearsalCardListResponse(StrictModel):
+    items: list[PreMeetingRehearsalCardResponse]
+
+
+class PcmChunkPayload(StrictModel):
+    sequence_id: int = Field(ge=1)
+    pcm_base64: str = Field(min_length=4, max_length=100_000)
+    sample_rate_hz: int = 16_000
+    channels: int = 1
+    sample_width_bytes: int = 2
+
+
+class TranscribeChunksRequest(StrictModel):
+    turn_event_id: str = Field(min_length=1, max_length=128)
+    streaming_transcription_consented: bool
+    capture_origin: str = Field(default="iphone_rehearsal_ptt", max_length=64)
+    continuous_stream: bool = False
+    save_self_excerpt: bool = False
+    chunks: list[PcmChunkPayload] = Field(min_length=1, max_length=64)
+
+
+class ChunkDeletionReceiptResponse(StrictModel):
+    sequence_id: int
+    bytes_zeroed: int
+    deleted_immediately: Literal[True]
+    deleted_at: str
+
+
+class TurnTranscriptionResponse(StrictModel):
+    turn_event_id: str
+    rehearsal_id: str
+    learner_id: str
+    transcript: str
+    confidence: float
+    below_confidence_threshold: bool
+    partial_count: int
+    chunk_receipts: list[ChunkDeletionReceiptResponse]
+    retained_pcm_bytes: Literal[0]
+    transcript_delete_after: str | None
+    provider: Literal["aws_transcribe_streaming"]
+    provenance: Literal["fixture", "live"]
+
+
+class HapticEventRequest(StrictModel):
+    source_event_id: str = Field(min_length=1, max_length=128)
+    trigger: Literal[
+        "ptt_recording_started",
+        "ptt_recording_released",
+        "counterpart_turn_ready",
+        "support_repair_offered",
+        "turn_budget_boundary",
+        "rehearsal_completed",
+        "mid_speech_pacing_interrupt",
+    ]
+    turn_id: str | None = Field(default=None, max_length=32)
+    target_device: str = Field(default="ios_rehearsal_client", max_length=64)
+    haptics_enabled: bool = True
+    reduced_motion: bool = False
+
+
+class HapticPulseSequenceResponse(StrictModel):
+    pattern: Literal["SHORT_DOUBLE", "STEADY_BUZZ"]
+    pulse_durations_ms: list[int]
+    gap_durations_ms: list[int]
+    total_duration_ms: int
+
+
+class HapticFeedbackEventResponse(StrictModel):
+    event_id: str
+    rehearsal_id: str
+    turn_id: str | None
+    trigger: str
+    pattern: Literal["SHORT_DOUBLE", "STEADY_BUZZ"] | None
+    sequence: HapticPulseSequenceResponse | None
+    target_device: Literal["ios_rehearsal_client"]
+    emitted: bool
+    suppression_reason: str | None
+    visual_caption_key: str
+    voiceover_announcement: str
+    duplicate: bool
+    created_at: str

@@ -286,7 +286,7 @@ def test_full_rehearsal_session_and_learner_progress_history_flow() -> None:
     assert len(progress_after_rehearsal["rehearsal_history"]) == 1
 
     # 6. Advance clock to follow-up day, ingest & confirm linked attempt -> OutcomeComparison!
-    client.app.state.runtime._fixed_clock = datetime(2026, 10, 25, 13, 30, tzinfo=UTC)  # type: ignore[union-attr]
+    client.app.state.runtime._fixed_clock = datetime(2026, 10, 25, 13, 30, tzinfo=UTC)  # type: ignore[attr-defined,union-attr]
     ingested_2 = _ingest_repair_attempt(
         client,
         ref="bee-rec-102",

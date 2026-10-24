@@ -21,6 +21,7 @@ def test_openapi_v1_contract_has_no_drift_and_covers_rehearsal_and_progress_rout
 
     expected_routes = {
         "/healthz": {"get"},
+        "/v1/health": {"get"},
         "/v1/consents": {"post"},
         "/v1/consents/{consent_id}/revoke": {"post"},
         "/v1/attempts/ingest": {"post"},

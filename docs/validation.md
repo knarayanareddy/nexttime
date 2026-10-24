@@ -8,14 +8,14 @@ Recorded 2026-10-24. Project tests, OpenAPI contract checks, wheel/sdist builds,
 | --- | --- |
 | Ruff lint + format check | Passed (`ruff check .` and `ruff format --check .`) |
 | Strict mypy | Passed (`0` issues across `45` source files in `packages/` and `services/`) |
-| Unit tests | `101/101` passed |
-| Branch-aware coverage (`domain`, `model-gateway`, `bee-adapter`, `calendar`, `rehearsal`, `minimization`, `bee-bridge`, `api`) | `92.63%` branch coverage (exceeds `90%` gate) |
-| Canonical schema & OpenAPI 3.1 contract tests | `12/12` passed (`real-world-attempt`, `breakdown_propose.v1`, `openapi.v1.json` zero-drift across 23 REST routes + `/v1/rehearsal/ws` WebSocket check, and pure-stdlib domain AST check) |
+| Unit tests | `105/105` passed |
+| Branch-aware coverage (`domain`, `model-gateway`, `bee-adapter`, `calendar`, `rehearsal`, `minimization`, `bee-bridge`, `api`) | `92.64%` branch coverage (exceeds `90%` gate) |
+| Canonical schema & OpenAPI 3.1 contract tests | `12/12` passed (`real-world-attempt`, `breakdown_propose.v1`, `openapi.v1.json` zero-drift across 24 REST routes + `/v1/rehearsal/ws` WebSocket check, and pure-stdlib domain AST check) |
 | Privacy & authorization security tests | `5/5` passed (`AC-NT-019` cross-learner IDOR denial, `SEC-NT-003` learner/bridge token scope separation, consent revocation cascade, calendar zero-title/sensitive-topic exclusion, immediate PCM zeroing, and Bee haptic command prohibition) |
 | Third-party dependency audit | `0` known vulnerabilities (`uv run pip-audit --skip-editable`) |
-| Source distribution + wheel | Built cleanly (`uv build`) |
-| Fixture walking path (`make dev`) & CLI rehearsal simulator (`scripts/simulate_rehearsal.py`) | Passed |
-| **Total automated tests** | **`118/118` passed** |
+| Source distribution + wheel + static web bundle | Built cleanly (`uv build` + `pnpm --dir apps/web build`) |
+| Fixture walking path (`make dev`), CLI simulator (`scripts/simulate_rehearsal.py`), & Playwright demo recording (`docs/media/nexttime-demo.webm`) | Passed |
+| **Total automated tests** | **`122/122` passed** |
 
 ## Validated local slices
 

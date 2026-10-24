@@ -8,6 +8,10 @@ __pycache__/
 htmlcov/
 dist/
 build/
+node_modules/
+apps/web/node_modules/
+apps/web/dist/
+.playwright-cli/
 .env
 .env.local
 .env.*.local

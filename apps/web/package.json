@@ -1,0 +1,30 @@
+{
+  "name": "@nexttime/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "NextTime interactive Dutch rehearsal player (standalone GitHub Pages sandbox + live /v1/rehearsal/ws mode)",
+  "type": "module",
+  "packageManager": "pnpm@10.12.4",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 3000",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 0.0.0.0 --port 3000",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.23",
+    "@types/react-dom": "18.3.7",
+    "@vitejs/plugin-react": "4.5.2",
+    "typescript": "5.8.3",
+    "vite": "6.3.5"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}

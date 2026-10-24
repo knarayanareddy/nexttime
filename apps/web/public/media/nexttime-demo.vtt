@@ -1,13 +1,13 @@
 WEBVTT
 
-00:00.000 --> 00:03.800
-1/4 · Calendar Rehearsal Candidate: Dutch Morning Standup (opaque calref_*, zero raw title retained).
+00:00.000 --> 00:42.000
+1/4 · Calendar Standup Candidate: Dutch morning standup rehearsal candidate (opaque calref_*, zero raw title retained).
 
-00:03.800 --> 00:07.800
-2/4 · Polly Counterpart Audio playback and SHORT_DOUBLE turn-boundary haptic pulse (Bee wearable excluded).
+00:42.000 --> 01:28.000
+2/4 · Polly Dutch Counterpart Audio + SHORT_DOUBLE turn-boundary haptic cue and streaming push-to-talk speech.
 
-00:07.800 --> 00:15.800
-3/4 · Real-time streaming Dutch push-to-talk transcription, gentle repair on incomplete reply ('Ja, dank u.'), and immediate 0-byte raw PCM deletion.
+01:28.000 --> 01:48.000
+3/4 · Turn 2 Counterpart Prompt, gentle repair on incomplete reply ('Ja, dank u.'), and immediate 0B raw PCM deletion.
 
-00:15.800 --> 00:21.500
-4/4 · Post-rehearsal communication & pacing breakdown analysis: rubric_v1 satisfied, 0B PCM retained, authentic mastery untouched.
+01:48.000 --> 02:02.112
+4/4 · Communication & pacing breakdown analysis: rubric satisfied, 0B PCM retained, authentic mastery untouched.

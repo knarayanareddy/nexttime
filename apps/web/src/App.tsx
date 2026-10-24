@@ -40,23 +40,23 @@ const WALKTHROUGH_CHAPTERS: readonly WalkthroughChapter[] = [
   },
   {
     id: "polly_haptics",
-    timestampLabel: "0:04",
-    startSec: 3.8,
+    timestampLabel: "0:42",
+    startSec: 42,
     title: "Polly Audio & Pacing Haptics",
     summary: "Lotte (nl-NL) counterpart prompt + SHORT_DOUBLE turn-boundary pulse.",
   },
   {
     id: "streaming_ptt",
-    timestampLabel: "0:08",
-    startSec: 7.8,
-    title: "Real-Time Transcription & 0B PCM",
+    timestampLabel: "1:28",
+    startSec: 88,
+    title: "Real-Time Transcription & Gentle Repair",
     summary: "Streaming Dutch PTT chunks, gentle repair on 'Ja, dank u.', and 0B PCM zeroing.",
   },
   {
     id: "breakdown",
-    timestampLabel: "0:16",
-    startSec: 15.8,
-    title: "Communication Breakdown Analysis",
+    timestampLabel: "1:48",
+    startSec: 108,
+    title: "Breakdown Analysis & Ledger",
     summary: "Satisfied rubric_v1 criteria & privacy ledger (authentic mastery untouched).",
   },
 ];
@@ -101,6 +101,7 @@ export function App(): React.ReactElement {
   const walkthroughVideoRef = useRef<HTMLVideoElement | null>(null);
 
   const demoVideoUrl = `${import.meta.env.BASE_URL}media/nexttime-demo.webm`;
+  const demoVideoMp4Url = `${import.meta.env.BASE_URL}media/nexttime-demo.mp4`;
   const demoCaptionsUrl = `${import.meta.env.BASE_URL}media/nexttime-demo.vtt`;
 
   const seekWalkthroughChapter = (startSec: number): void => {
@@ -730,20 +731,22 @@ export function App(): React.ReactElement {
               <video
                 ref={walkthroughVideoRef}
                 className="nt-walkthrough-video"
-                src={demoVideoUrl}
                 controls
                 playsInline
                 preload="metadata"
                 data-testid="walkthrough-video-element"
               >
+                <source src={demoVideoMp4Url} type="video/mp4" />
+                <source src={demoVideoUrl} type="video/webm" />
                 <track
                   kind="captions"
                   src={demoCaptionsUrl}
                   srcLang="en"
                   label="English walkthrough captions"
                 />
-                Your browser does not support embedded WebM playback.{" "}
-                <a href={demoVideoUrl}>Download nexttime-demo.webm (5.6 MB)</a>.
+                Your browser does not support embedded video playback.{" "}
+                <a href={demoVideoMp4Url}>Download nexttime-demo.mp4 (3.8 MB)</a> or{" "}
+                <a href={demoVideoUrl}>Download nexttime-demo.webm (18.5 MB)</a>.
               </video>
             </div>
 

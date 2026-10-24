@@ -78,6 +78,9 @@ def test_github_pages_workflow_and_standalone_web_rehearsal_bundle() -> None:
     assert linked_video.is_symlink(), "apps/web/public/media/nexttime-demo.webm must be a symlink"
     assert linked_video.resolve() == DEFAULT_OUTPUT_VIDEO.resolve()
 
+    linked_mp4 = REPO_ROOT / "apps" / "web" / "public" / "media" / "nexttime-demo.mp4"
+    assert linked_mp4.is_symlink(), "apps/web/public/media/nexttime-demo.mp4 must be a symlink"
+
     captions_vtt = REPO_ROOT / "apps" / "web" / "public" / "media" / "nexttime-demo.vtt"
     assert captions_vtt.is_file()
 
@@ -85,6 +88,7 @@ def test_github_pages_workflow_and_standalone_web_rehearsal_bundle() -> None:
     assert "📹 Watch 90s Walkthrough" in app_tsx
     assert "💬 Interactive Dutch Rehearsal" in app_tsx
     assert "media/nexttime-demo.webm" in app_tsx
+    assert "media/nexttime-demo.mp4" in app_tsx
     assert "<video" in app_tsx
 
     dist_video = REPO_ROOT / "apps" / "web" / "dist" / "media" / "nexttime-demo.webm"
@@ -92,6 +96,11 @@ def test_github_pages_workflow_and_standalone_web_rehearsal_bundle() -> None:
         assert dist_video.is_file() and not dist_video.is_symlink()
         with dist_video.open("rb") as fh:
             assert fh.read(4) == WEBM_EBML_MAGIC
+
+    dist_mp4 = REPO_ROOT / "apps" / "web" / "dist" / "media" / "nexttime-demo.mp4"
+    if dist_mp4.exists():
+        assert dist_mp4.is_file() and not dist_mp4.is_symlink()
+        assert dist_mp4.stat().st_size > 50_000
 
     workflow_path = REPO_ROOT / ".github" / "workflows" / "pages.yml"
     assert workflow_path.is_file()

@@ -7,6 +7,7 @@ on:
     paths:
       - "apps/web/**"
       - "docs/media/nexttime-demo.webm"
+      - "docs/media/nexttime-demo.mp4"
       - "examples/real-world-attempt.example.json"
       - "ui/tokens.json"
       - ".github/workflows/pages.yml"
@@ -48,6 +49,8 @@ jobs:
           pnpm --dir apps/web build
           test -f apps/web/dist/media/nexttime-demo.webm
           test ! -L apps/web/dist/media/nexttime-demo.webm
+          test -f apps/web/dist/media/nexttime-demo.mp4
+          test ! -L apps/web/dist/media/nexttime-demo.mp4
           cp apps/web/dist/index.html apps/web/dist/404.html
           touch apps/web/dist/.nojekyll
 
